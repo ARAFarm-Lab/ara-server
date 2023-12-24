@@ -45,7 +45,7 @@ func main() {
 		dbConfig.Password,
 		dbConfig.DBName,
 	)
-	_, err = initDB("postgres", dbConnectionString)
+	dbInstance, err := initDB("postgres", dbConnectionString)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -59,7 +59,7 @@ func main() {
 
 	// initialize layers
 	infra := infrastructure.NewInfrastructure(config)
-	repoDB := db.NewRepository(infra)
+	repoDB := db.NewRepository(dbInstance, infra)
 	repoMQ := mq.NewRepository(infra, mqttClient)
 	usecase := usecase.NewUsecase(infra, repoDB, repoMQ)
 	h := handler.NewHandler(usecase, mqttClient)

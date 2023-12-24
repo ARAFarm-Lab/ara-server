@@ -2,6 +2,9 @@ package handler
 
 import (
 	"ara-server/internal/usecase"
+	"ara-server/util/log"
+	"strconv"
+	"strings"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 	"github.com/gin-gonic/gin"
@@ -25,7 +28,21 @@ func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
 }
 
 func (h *handler) registerMQHandler() {
-	h.mqtt.Subscribe("mq-iot-poc", 1, nil)
+	h.mqtt.Subscribe("sensor-read/#", 1, h.HandleSensorRead)
+}
+
+func getDeviceID(topic string) int64 {
+	topicSegments := strings.Split(topic, "/")
+	if len(topicSegments) < 1 {
+		return -1
+	}
+	deviceID, err := strconv.ParseInt(topicSegments[len(topicSegments)-1], 10, 64)
+	if err != nil {
+		log.Error(err, "error parsing device id", topicSegments)
+		return -1
+	}
+
+	return deviceID
 }
 
 func (h *handler) ToggleLamp(c *gin.Context) {
