@@ -1,0 +1,7 @@
+CREATE TABLE IF NOT EXISTS action_histories (
+    device_id INTEGER NOT NULL,
+    action_type SMALLINT NOT NULL,
+    value VARCHAR(100) NOT NULL,
+    action_by SMALLINT NOT NULL,
+    action_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

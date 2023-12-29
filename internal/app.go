@@ -9,7 +9,8 @@ import (
 	"syscall"
 	"time"
 
-	"ara-server/internal/handler"
+	httpHandler "ara-server/internal/handler/http"
+	mqHandler "ara-server/internal/handler/mq"
 	"ara-server/internal/infrastructure"
 	"ara-server/internal/infrastructure/configuration"
 	"ara-server/internal/repository/db"
@@ -37,15 +38,7 @@ func main() {
 
 	// initialize db
 	appConfig := config.GetConfig()
-	dbConfig := appConfig.DB
-	dbConnectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s sslmode=disable",
-		dbConfig.Host,
-		dbConfig.Port,
-		dbConfig.Username,
-		dbConfig.Password,
-		dbConfig.DBName,
-	)
-	dbInstance, err := initDB("postgres", dbConnectionString)
+	dbInstance, err := initDB(appConfig.DB)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,9 +55,12 @@ func main() {
 	repoDB := db.NewRepository(dbInstance, infra)
 	repoMQ := mq.NewRepository(infra, mqttClient)
 	usecase := usecase.NewUsecase(infra, repoDB, repoMQ)
-	h := handler.NewHandler(usecase, mqttClient)
 
-	h.RegisterHTTPHandler(router)
+	handlerHTTP := httpHandler.NewHandler(usecase)
+	mqHandler.InitHandler(usecase, mqttClient)
+
+	handlerHTTP.RegisterHTTPHandler(router)
+
 	server := http.Server{
 		Addr:    ":5000",
 		Handler: router,
@@ -100,11 +96,19 @@ func main() {
 	}
 }
 
-func initDB(driver, connectionString string) (*sqlx.DB, error) {
+func initDB(config configuration.DBConfig) (*sqlx.DB, error) {
 	var connectingError error
+	dbConnectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s TimeZone=Asia/Jakarta sslmode=disable",
+		config.Host,
+		config.Port,
+		config.Username,
+		config.Password,
+		config.DBName,
+	)
+
 	for i := 0; i < maxConnectionRetryAttempts; i++ {
 		log.Info(fmt.Sprintf("connecting to DB (%d/%d)", i+1, maxConnectionRetryAttempts))
-		db, err := sqlx.Connect("postgres", connectionString)
+		db, err := sqlx.Connect("postgres", dbConnectionString)
 		if err != nil {
 			connectingError = err
 			time.Sleep(1 * time.Second)
