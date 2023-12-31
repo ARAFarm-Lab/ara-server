@@ -2,12 +2,10 @@ package db
 
 const (
 	queryGetLastAction = `
-		SELECT * 
+		SELECT DISTINCT ON (action_type) * 
 		FROM action_histories 
-		WHERE 
-			device_id = $1 AND action_type = $2 
-		ORDER BY action_at DESC 
-		LIMIT 1
+		WHERE %s
+		ORDER BY action_type, action_at DESC
 	`
 
 	queryInsertActionLog = `

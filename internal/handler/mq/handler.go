@@ -24,6 +24,7 @@ func InitHandler(usecase *usecase.Usecase, mqtt mqtt.Client) *handler {
 
 func (h *handler) registerMQHandler() {
 	h.mqtt.Subscribe("sensor-read/#", 1, h.HandleSensorRead)
+	h.mqtt.Subscribe("device-initial-state-request/#", 1, h.HandleInitiateDeviceState)
 }
 
 func getDeviceID(topic string) int64 {
