@@ -2,10 +2,25 @@ package usecase
 
 import (
 	"ara-server/internal/constants"
-	"ara-server/internal/repository/mq"
 	"ara-server/util/log"
+	"strconv"
 	"time"
 )
+
+func (uc *Usecase) InitiateDeviceState(deviceID int64) {
+	histories, err := uc.db.GetLastActions(deviceID)
+	if err != nil {
+		log.Error(err, "error getting last action", deviceID)
+		return
+	}
+
+	result := make([][]interface{}, 0, len(histories))
+	for _, history := range histories {
+		result = append(result, []interface{}{history.ActionType, history.Value})
+	}
+
+	uc.mq.PublishJSON("dcs-"+strconv.FormatInt(deviceID, 10), result)
+}
 
 func (uc *Usecase) toggleRelay(param DispatcherParam) error {
 	value, ok := param.Value.(bool)
@@ -22,8 +37,5 @@ func (uc *Usecase) toggleRelay(param DispatcherParam) error {
 		ActionAt:   time.Now(),
 	})
 
-	return uc.mq.PublishJSON(generateDeviceTopic(param.DeviceID), mq.PublishJSONPayload{
-		ActionType: constants.ActionTypeRelay,
-		Value:      value,
-	})
+	return uc.mq.PublishJSON(generateDeviceTopic(param.DeviceID), []interface{}{constants.ActionTypeRelay, value})
 }

@@ -10,7 +10,7 @@ func (uc *Usecase) DispatchAction(param DispatcherParam) error {
 }
 
 func (uc *Usecase) GetLastAction(deviceID int64, actionType constants.ActionType) (ActionHistory, error) {
-	history, err := uc.db.GetLastAction(deviceID, actionType)
+	history, err := uc.db.GetLastActionByActionType(deviceID, actionType)
 	if err != nil {
 		return ActionHistory{}, err
 	}

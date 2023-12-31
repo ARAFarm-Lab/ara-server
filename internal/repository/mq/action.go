@@ -2,8 +2,8 @@ package mq
 
 import "encoding/json"
 
-func (repo *Repository) PublishJSON(topic string, payload PublishJSONPayload) error {
-	bytes, err := json.Marshal([]interface{}{payload.ActionType, payload.Value})
+func (repo *Repository) PublishJSON(topic string, payload interface{}) error {
+	bytes, err := json.Marshal(payload)
 	if err != nil {
 		return err
 	}

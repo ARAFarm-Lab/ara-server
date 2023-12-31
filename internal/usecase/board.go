@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"ara-server/internal/constants"
-	"ara-server/internal/repository/mq"
 	"ara-server/util/log"
 	"time"
 )
@@ -22,8 +21,5 @@ func (uc *Usecase) toggleBuiltInLED(param DispatcherParam) error {
 		ActionAt:   time.Now(),
 	})
 
-	return uc.mq.PublishJSON(generateDeviceTopic(param.DeviceID), mq.PublishJSONPayload{
-		ActionType: constants.ActionTypeBuiltInLED,
-		Value:      value,
-	})
+	return uc.mq.PublishJSON(generateDeviceTopic(param.DeviceID), []interface{}{constants.ActionTypeBuiltInLED, value})
 }
