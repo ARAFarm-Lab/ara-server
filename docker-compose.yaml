@@ -10,6 +10,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    volumes:
+      - ./docker/app/log:./log
   mqtt_broker:
     image: eclipse-mosquitto
     ports:

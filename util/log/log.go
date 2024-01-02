@@ -10,7 +10,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-const logFile = "./log/iot-server.log"
+const logFile = "./log/ara-server.log"
 
 var logger zerolog.Logger
 
