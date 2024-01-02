@@ -34,7 +34,7 @@ func getDeviceID(topic string) int64 {
 	}
 	deviceID, err := strconv.ParseInt(topicSegments[len(topicSegments)-1], 10, 64)
 	if err != nil {
-		log.Error(err, "error parsing device id", topicSegments)
+		log.Error(topicSegments, err, "error parsing device id")
 		return -1
 	}
 

@@ -16,7 +16,7 @@ func (h *handler) HandleSensorRead(client mqtt.Client, msg mqtt.Message) {
 		return
 	}
 
-	log.Info("sensor read from " + strconv.FormatInt(deviceID, 10))
+	log.Info(nil, nil, "sensor read from "+strconv.FormatInt(deviceID, 10))
 	var payload [][]int
 	if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
 		fmt.Println(err)

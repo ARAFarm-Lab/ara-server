@@ -1,7 +1,6 @@
 package configuration
 
 import (
-	"ara-server/util/log"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -25,7 +24,6 @@ func InitializeConfig() (Config, error) {
 	if env == "" {
 		env = "development"
 	}
-	log.Info(fmt.Sprintf("Running on Environment %s", env))
 
 	workingdir, err := os.Getwd()
 	if err != nil {

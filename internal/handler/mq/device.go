@@ -7,7 +7,7 @@ import (
 )
 
 func (h *handler) HandleInitiateDeviceState(client mqtt.Client, msg mqtt.Message) {
-	log.Info("handling initiate device state")
+	log.Info(nil, nil, "handling initiate device state")
 
 	deviceID := getDeviceID(msg.Topic())
 	if deviceID < 0 {

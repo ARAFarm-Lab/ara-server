@@ -9,7 +9,7 @@ import (
 func (uc *Usecase) toggleBuiltInLED(param DispatcherParam) error {
 	value, ok := param.Value.(bool)
 	if !ok {
-		log.Error(errorInvalidActionValue, "invalid built in LED action value", param.Value)
+		log.Error(param.Value, errorInvalidActionValue, "invalid built in LED action value")
 		return errorInvalidActionValue
 	}
 
