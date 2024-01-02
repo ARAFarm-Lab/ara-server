@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -15,8 +16,12 @@ func (config *Config) GetConfig() AppConfig {
 	return config.config
 }
 
+func (config *Config) IsDevelopment() bool {
+	return config.env == Development
+}
+
 func InitializeConfig() (Config, error) {
-	env := os.Getenv(keyENV)
+	env := strings.ToLower(os.Getenv(keyENV))
 	if env == "" {
 		env = "development"
 	}
@@ -41,5 +46,6 @@ func InitializeConfig() (Config, error) {
 
 	return Config{
 		config: config,
+		env:    ENV(env),
 	}, nil
 }
