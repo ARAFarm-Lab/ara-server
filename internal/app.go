@@ -33,22 +33,25 @@ func main() {
 	// initialize config
 	config, err := configuration.InitializeConfig()
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(nil, err, "init config got error")
 	}
+
+	// init logger
+	log.NewLogger(config)
 
 	// initialize db
 	appConfig := config.GetConfig()
 	dbInstance, err := initDB(appConfig.DB)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(nil, err, "init DB got error")
 	}
 
 	mqttClient, err := initMQTT(appConfig.MQTT)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(nil, err, "init MQTT got error")
 	}
 
-	router := initHTTPServer()
+	router := initHTTPServer(config)
 
 	// initialize layers
 	infra := infrastructure.NewInfrastructure(config)
@@ -59,10 +62,6 @@ func main() {
 	handlerHTTP := httpHandler.NewHandler(usecase)
 	mqHandler.InitHandler(usecase, mqttClient)
 
-	// set to release mode if the environment is not development
-	if !config.IsDevelopment() {
-		gin.SetMode(gin.ReleaseMode)
-	}
 	handlerHTTP.RegisterHTTPHandler(router)
 
 	server := http.Server{
@@ -72,21 +71,21 @@ func main() {
 
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal(err)
+			log.Fatal(nil, err, "")
 		}
 	}()
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Info("Shutdown Server ...")
+	log.Info(nil, nil, "Shutdown Server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Gracefully stop the server and its dependencies
 	if err := server.Shutdown(ctx); err != nil {
-		log.Error(err, "Server Shutdown Error")
+		log.Error(nil, err, "Server Shutdown Error")
 	}
 
 	// Closing mqtt connection
@@ -94,9 +93,9 @@ func main() {
 
 	select {
 	case <-ctx.Done():
-		log.Info("timeout of 5 seconds.")
+		log.Info(nil, nil, "timeout of 5 seconds.")
 	default:
-		log.Info("Server exiting")
+		log.Info(nil, nil, "Server exiting")
 	}
 }
 
@@ -111,7 +110,7 @@ func initDB(config configuration.DBConfig) (*sqlx.DB, error) {
 	)
 
 	for i := 0; i < maxConnectionRetryAttempts; i++ {
-		log.Info(fmt.Sprintf("connecting to DB (%d/%d)", i+1, maxConnectionRetryAttempts))
+		log.Info(nil, nil, fmt.Sprintf("Connecting to DB (%d/%d)", i+1, maxConnectionRetryAttempts))
 		db, err := sqlx.Connect("postgres", dbConnectionString)
 		if err != nil {
 			connectingError = err
@@ -119,21 +118,25 @@ func initDB(config configuration.DBConfig) (*sqlx.DB, error) {
 			continue
 		}
 
-		log.Info("Connected to DB")
+		log.Info(nil, nil, "Connected to DB")
 		return db, nil
 	}
 
 	return nil, connectingError
 }
 
-func initHTTPServer() *gin.Engine {
+func initHTTPServer(config configuration.Config) *gin.Engine {
+	if !config.IsDevelopment() {
+		gin.SetMode(gin.ReleaseMode)
+	}
+
 	engine := gin.Default()
 
-	config := cors.DefaultConfig()
-	config.AllowAllOrigins = true
-	config.AllowHeaders = []string{"Authorization", "Content-Type"}
+	ginConfig := cors.DefaultConfig()
+	ginConfig.AllowAllOrigins = true
+	ginConfig.AllowHeaders = []string{"Authorization", "Content-Type"}
 
-	engine.Use(cors.New(config))
+	engine.Use(cors.New(ginConfig))
 
 	return engine
 }
@@ -159,6 +162,6 @@ func initMQTT(config configuration.MQTTConfig) (mqtt.Client, error) {
 		return nil, token.Error()
 	}
 
-	log.Info("Connected to MQTT Broker")
+	log.Info(nil, nil, "Connected to MQTT Broker")
 	return client, nil
 }
