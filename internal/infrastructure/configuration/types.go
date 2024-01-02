@@ -1,7 +1,15 @@
 package configuration
 
+type ENV string
+
+const (
+	Development ENV = "development"
+	Production  ENV = "production"
+)
+
 type Config struct {
 	config AppConfig
+	env    ENV
 }
 
 type AppConfig struct {

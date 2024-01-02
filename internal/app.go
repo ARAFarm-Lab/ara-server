@@ -59,6 +59,10 @@ func main() {
 	handlerHTTP := httpHandler.NewHandler(usecase)
 	mqHandler.InitHandler(usecase, mqttClient)
 
+	// set to release mode if the environment is not development
+	if !config.IsDevelopment() {
+		gin.SetMode(gin.ReleaseMode)
+	}
 	handlerHTTP.RegisterHTTPHandler(router)
 
 	server := http.Server{
@@ -123,13 +127,15 @@ func initDB(config configuration.DBConfig) (*sqlx.DB, error) {
 }
 
 func initHTTPServer() *gin.Engine {
-	r := gin.Default()
+	engine := gin.Default()
+
 	config := cors.DefaultConfig()
 	config.AllowAllOrigins = true
 	config.AllowHeaders = []string{"Authorization", "Content-Type"}
-	r.Use(cors.New(config))
 
-	return r
+	engine.Use(cors.New(config))
+
+	return engine
 }
 
 func initMQTT(config configuration.MQTTConfig) (mqtt.Client, error) {
