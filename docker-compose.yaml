@@ -70,10 +70,25 @@ services:
     environment:
       - GF_SERVER_ROOT_URL=${GRAFANA_ROOT_URL}
       - GF_SERVER_DOMAIN=${GRAFANA_DOMAIN}
-      - GF_SERVER_SERVE_FROM_SUB_PATH=true
+      - GF_SERVER_SERVE_FROM_SUB_PATH=${GRAFANA_SERVE_FROM_SUB_PATH}
     ports:
       - "3003:3000"
     volumes:
       - ./docker/grafana/data:/var/lib/grafana
-      - ./docker/grafana/config.ini:/etc/grafana/config.ini
+      - ./docker/grafana/config.ini:/etc/grafana
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
+      - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
+      - ./docker/grafana/logs:/var/log/grafana
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./docker/prometheus/config.yml:/etc/prometheus/prometheus.yml
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+
+  node-exporter:
+    image: prom/node-exporter
+    ports:
+      - '9100:9100'
