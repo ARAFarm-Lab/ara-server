@@ -75,7 +75,7 @@ services:
       - "3003:3000"
     volumes:
       - ./docker/grafana/data:/var/lib/grafana
-      - ./docker/grafana/config.ini:/etc/grafana
+      - ./docker/grafana/config.ini:/etc/grafana/config.ini
       - ./docker/grafana/provisioning:/etc/grafana/provisioning
       - ./docker/grafana/dashboards:/var/lib/grafana/dashboards
       - ./docker/grafana/logs:/var/log/grafana
