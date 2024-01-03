@@ -87,8 +87,3 @@ services:
       - ./docker/prometheus/config.yml:/etc/prometheus/prometheus.yml
     command:
       - '--config.file=/etc/prometheus/prometheus.yml'
-
-  node-exporter:
-    image: prom/node-exporter
-    ports:
-      - '9100:9100'
