@@ -5,6 +5,7 @@ services:
     restart: always
     environment:
       - ENV=production
+      - TZ=Asia/Jakarta
     ports:
       - "3002:5000"
     depends_on:
@@ -16,7 +17,6 @@ services:
     image: eclipse-mosquitto
     ports:
       - "${MQTT_OPEN_PORT}:1883"
-      - "1883:1883"
     volumes:
       - ./docker/mosquitto/config:/mosquitto/config
       - ./docker/mosquitto/data:/mosquitto/data
@@ -31,7 +31,6 @@ services:
       POSTGRES_DB: ${DB_NAME}
     ports:
       - "${DB_OPEN_PORT}:5432"
-      - "5432"
     volumes:
       - ./docker/db/data:/var/lib/postgresql/data
     healthcheck:
@@ -54,3 +53,23 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  loki:
+    image: grafana/loki:latest
+    volumes:
+      - ./docker/loki/config.yaml:/etc/loki/config.yaml
+      - ./docker/loki/wal:/wal
+    command: -config.file=/etc/loki/config.yaml
+  promtail:
+    image: grafana/promtail:latest
+    volumes:
+      - ./docker/promtail/config.yaml:/etc/promtail/config.yaml
+      - ./docker/app/log:/var/log/ara-server
+    command: -config.file=/etc/promtail/config.yaml
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3003:3000"
+    volumes:
+      - ./docker/grafana/data:/var/lib/grafana
+      - ./docker/grafana/config.ini:/etc/grafana/config.ini
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
