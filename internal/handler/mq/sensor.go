@@ -3,6 +3,7 @@ package mq
 import (
 	"ara-server/internal/usecase"
 	"ara-server/util/log"
+	"context"
 	"encoding/json"
 	"fmt"
 	"strconv"
@@ -10,13 +11,13 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func (h *handler) HandleSensorRead(client mqtt.Client, msg mqtt.Message) {
+func (h *handler) HandleSensorRead(ctx context.Context, client mqtt.Client, msg mqtt.Message) {
 	deviceID := getDeviceID(msg.Topic())
 	if deviceID < 0 {
 		return
 	}
 
-	log.Info(nil, nil, "sensor read from "+strconv.FormatInt(deviceID, 10))
+	log.Info(ctx, nil, nil, "sensor read from "+strconv.FormatInt(deviceID, 10))
 	var payload [][]int
 	if err := json.Unmarshal(msg.Payload(), &payload); err != nil {
 		fmt.Println(err)

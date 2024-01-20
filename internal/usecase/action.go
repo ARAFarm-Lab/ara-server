@@ -3,10 +3,16 @@ package usecase
 import (
 	"ara-server/internal/constants"
 	"ara-server/internal/repository/db"
+	"context"
 )
 
-func (uc *Usecase) DispatchAction(param DispatcherParam) error {
-	return uc.actionDispatcherMap[param.ActionType](param)
+func (uc *Usecase) DispatchAction(ctx context.Context, param DispatcherParam) error {
+	dispatch, found := uc.actionDispatcherMap[param.ActionType]
+	if !found {
+		return errorInvalidActionType
+	}
+
+	return dispatch(ctx, param)
 }
 
 func (uc *Usecase) GetLastAction(deviceID int64, actionType constants.ActionType) (ActionHistory, error) {

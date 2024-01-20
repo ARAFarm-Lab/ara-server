@@ -17,3 +17,7 @@ func NewRepository(db *sqlx.DB, infra *infrastructure.Infrastructure) *Repositor
 		infra: infra,
 	}
 }
+
+func (repo *Repository) Rebind(query string) string {
+	return sqlx.Rebind(sqlx.DOLLAR, query)
+}

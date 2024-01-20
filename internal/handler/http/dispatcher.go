@@ -13,7 +13,7 @@ func (h *handler) HandleDispatchAction(c *gin.Context) {
 		return
 	}
 
-	if err := h.usecase.DispatchAction(usecase.DispatcherParam(request)); err != nil {
+	if err := h.usecase.DispatchAction(c, usecase.DispatcherParam(request)); err != nil {
 		WriteJson(c, nil, err)
 		return
 	}
