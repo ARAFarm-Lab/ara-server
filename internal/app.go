@@ -9,6 +9,7 @@ import (
 	"syscall"
 	"time"
 
+	cronHandler "ara-server/internal/handler/cron"
 	httpHandler "ara-server/internal/handler/http"
 	mqHandler "ara-server/internal/handler/mq"
 	"ara-server/internal/infrastructure"
@@ -23,6 +24,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 	_ "github.com/lib/pq"
+	"github.com/robfig/cron/v3"
 )
 
 const (
@@ -30,10 +32,12 @@ const (
 )
 
 func main() {
+	ctx := context.Background()
+
 	// initialize config
 	config, err := configuration.InitializeConfig()
 	if err != nil {
-		log.Fatal(nil, err, "init config got error")
+		log.Fatal(ctx, nil, err, "init config got error")
 	}
 
 	// init logger
@@ -41,14 +45,14 @@ func main() {
 
 	// initialize db
 	appConfig := config.GetConfig()
-	dbInstance, err := initDB(appConfig.DB)
+	dbInstance, err := initDB(ctx, appConfig.DB)
 	if err != nil {
-		log.Fatal(nil, err, "init DB got error")
+		log.Fatal(ctx, nil, err, "init DB got error")
 	}
 
-	mqttClient, err := initMQTT(appConfig.MQTT)
+	mqttClient, err := initMQTT(ctx, appConfig.MQTT)
 	if err != nil {
-		log.Fatal(nil, err, "init MQTT got error")
+		log.Fatal(ctx, nil, err, "init MQTT got error")
 	}
 
 	router := initHTTPServer(config)
@@ -59,47 +63,59 @@ func main() {
 	repoMQ := mq.NewRepository(infra, mqttClient)
 	usecase := usecase.NewUsecase(infra, repoDB, repoMQ)
 
-	handlerHTTP := httpHandler.NewHandler(usecase)
+	// initialize MQ handler
 	mqHandler.InitHandler(usecase, mqttClient)
 
+	// initialize HTTP handler
+	handlerHTTP := httpHandler.NewHandler(usecase)
 	handlerHTTP.RegisterHTTPHandler(router)
+
+	// initialize cron handler
+	cron := cron.New()
+	cronHandler.InitHandler(usecase, cron)
 
 	server := http.Server{
 		Addr:    ":5000",
 		Handler: router,
 	}
 
+	// starting the server
 	go func() {
 		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatal(nil, err, "")
+			log.Fatal(ctx, nil, err, "")
 		}
 	}()
+	cron.Start()
 
+	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 	<-quit
-	log.Info(nil, nil, "Shutdown Server ...")
+	log.Info(ctx, nil, nil, "Shutdown Server ...")
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
 	// Gracefully stop the server and its dependencies
 	if err := server.Shutdown(ctx); err != nil {
-		log.Error(nil, err, "Server Shutdown Error")
+		log.Error(ctx, nil, err, "Server Shutdown Error")
 	}
 
 	// Closing mqtt connection
 	mqttClient.Disconnect(1000)
 
+	// Stop cron
+	cron.Stop()
+
 	select {
 	case <-ctx.Done():
-		log.Info(nil, nil, "timeout of 5 seconds.")
+		log.Info(ctx, nil, nil, "timeout of 5 seconds.")
 	default:
-		log.Info(nil, nil, "Server exiting")
+		log.Info(ctx, nil, nil, "Server exiting")
 	}
 }
 
-func initDB(config configuration.DBConfig) (*sqlx.DB, error) {
+func initDB(ctx context.Context, config configuration.DBConfig) (*sqlx.DB, error) {
 	var connectingError error
 	dbConnectionString := fmt.Sprintf("host=%s port=%s user=%s password=%s dbname=%s TimeZone=Asia/Jakarta sslmode=disable",
 		config.Host,
@@ -110,7 +126,7 @@ func initDB(config configuration.DBConfig) (*sqlx.DB, error) {
 	)
 
 	for i := 0; i < maxConnectionRetryAttempts; i++ {
-		log.Info(nil, nil, fmt.Sprintf("Connecting to DB (%d/%d)", i+1, maxConnectionRetryAttempts))
+		log.Info(ctx, nil, nil, fmt.Sprintf("Connecting to DB (%d/%d)", i+1, maxConnectionRetryAttempts))
 		db, err := sqlx.Connect("postgres", dbConnectionString)
 		if err != nil {
 			connectingError = err
@@ -118,7 +134,7 @@ func initDB(config configuration.DBConfig) (*sqlx.DB, error) {
 			continue
 		}
 
-		log.Info(nil, nil, "Connected to DB")
+		log.Info(ctx, nil, nil, "Connected to DB")
 		return db, nil
 	}
 
@@ -141,7 +157,7 @@ func initHTTPServer(config configuration.Config) *gin.Engine {
 	return engine
 }
 
-func initMQTT(config configuration.MQTTConfig) (mqtt.Client, error) {
+func initMQTT(ctx context.Context, config configuration.MQTTConfig) (mqtt.Client, error) {
 	// Now we establish the connection to the mqtt broker
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(config.Broker)
@@ -162,6 +178,6 @@ func initMQTT(config configuration.MQTTConfig) (mqtt.Client, error) {
 		return nil, token.Error()
 	}
 
-	log.Info(nil, nil, "Connected to MQTT Broker")
+	log.Info(ctx, nil, nil, "Connected to MQTT Broker")
 	return client, nil
 }

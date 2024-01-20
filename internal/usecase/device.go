@@ -3,14 +3,15 @@ package usecase
 import (
 	"ara-server/internal/constants"
 	"ara-server/util/log"
+	"context"
 	"strconv"
 	"time"
 )
 
-func (uc *Usecase) InitiateDeviceState(deviceID int64) {
+func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {
 	histories, err := uc.db.GetLastActions(deviceID)
 	if err != nil {
-		log.Error(deviceID, err, "error getting last action")
+		log.Error(ctx, deviceID, err, "error getting last action")
 		return
 	}
 
@@ -22,10 +23,10 @@ func (uc *Usecase) InitiateDeviceState(deviceID int64) {
 	uc.mq.PublishJSON("dcs-"+strconv.FormatInt(deviceID, 10), result)
 }
 
-func (uc *Usecase) toggleRelay(param DispatcherParam) error {
+func (uc *Usecase) toggleRelay(ctx context.Context, param DispatcherParam) error {
 	value, ok := param.Value.(bool)
 	if !ok {
-		log.Error(param.Value, errorInvalidActionValue, "invalid relay action value")
+		log.Error(ctx, param.Value, errorInvalidActionValue, "invalid relay action value")
 		return errorInvalidActionValue
 	}
 

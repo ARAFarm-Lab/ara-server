@@ -1,7 +1,9 @@
 package log
 
 import (
+	"ara-server/internal/constants"
 	"ara-server/internal/infrastructure/configuration"
+	"context"
 	"io"
 	"log"
 	"os"
@@ -14,16 +16,34 @@ const logFile = "./log/ara-server.log"
 
 var logger zerolog.Logger
 
-func Info(metadata interface{}, error error, message string) {
-	logger.Info().Timestamp().Interface("metadata", metadata).Err(error).Msg(message)
+func Info(ctx context.Context, metadata interface{}, error error, message string) {
+	var ctxID string
+	if ctx != nil {
+		if id, ok := ctx.Value(constants.CtxKeyCtxID).(string); ok {
+			ctxID = id
+		}
+	}
+	logger.Info().Timestamp().Str("ctx_id", ctxID).Interface("metadata", metadata).Err(error).Msg(message)
 }
 
-func Error(metadata interface{}, error error, message string) {
-	logger.Error().Timestamp().Interface("metadata", metadata).Err(error).Msg(message)
+func Error(ctx context.Context, metadata interface{}, error error, message string) {
+	var ctxID string
+	if ctx != nil {
+		if id, ok := ctx.Value(constants.CtxKeyCtxID).(string); ok {
+			ctxID = id
+		}
+	}
+	logger.Error().Timestamp().Str("ctx_id", ctxID).Interface("metadata", metadata).Err(error).Msg(message)
 }
 
-func Fatal(metadata interface{}, error error, message string) {
-	logger.Fatal().Timestamp().Interface("metadata", metadata).Err(error).Msg(message)
+func Fatal(ctx context.Context, metadata interface{}, error error, message string) {
+	var ctxID string
+	if ctx != nil {
+		if id, ok := ctx.Value(constants.CtxKeyCtxID).(string); ok {
+			ctxID = id
+		}
+	}
+	logger.Fatal().Timestamp().Str("ctx_id", ctxID).Interface("metadata", metadata).Err(error).Msg(message)
 }
 
 func NewLogger(config configuration.Config) {

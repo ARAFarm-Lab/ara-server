@@ -14,3 +14,12 @@ const (
 	ActionSourceScheduler                          // trigger by scheduler
 	ActionSourceDispatcher                         // trigger by condition defined in dispatcher
 )
+
+type ActionScheduleStatus uint8
+
+const (
+	ScheduleStatusPending ActionScheduleStatus = iota + 1
+	ScheduleStatusRunning
+	ScheduleStatusSuccess
+	ScheduleStatusFailed
+)

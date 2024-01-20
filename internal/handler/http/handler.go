@@ -12,15 +12,16 @@ type handler struct {
 }
 
 func NewHandler(usecase *usecase.Usecase) *handler {
-	return &handler{usecase: usecase}
+	return &handler{
+		usecase: usecase,
+	}
 }
 
 func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
-	router.GET("/last-action", h.HandleGetLastAction)
-
-	router.POST("/board/dispatch", h.HandleDispatchAction)
-
-	router.POST("/chart", h.HandleGetSensorChart)
+	router.GET("/last-action", h.initTracerContext, h.HandleGetLastAction)
+	router.POST("/board/dispatch", h.initTracerContext, h.HandleDispatchAction)
+	router.POST("/chart", h.initTracerContext, h.HandleGetSensorChart)
+	router.POST("/scheduler/trigger", h.initTracerContext, h.HandleTriggerScheduler)
 }
 
 func WriteJson(ctx *gin.Context, data interface{}, err error, statusCode ...int) {
