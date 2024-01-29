@@ -15,6 +15,13 @@ func (uc *Usecase) DispatchAction(ctx context.Context, param DispatcherParam) er
 	return dispatch(ctx, param)
 }
 
+func (uc *Usecase) GetAvailableActions(ctx context.Context) ([]DispatcherAction, error) {
+	return []DispatcherAction{
+		{Name: "Built In LED", Action: constants.ActionTypeBuiltInLED},
+		{Name: "Relay", Action: constants.ActionTypeRelay},
+	}, nil
+}
+
 func (uc *Usecase) GetLastAction(deviceID int64, actionType constants.ActionType) (ActionHistory, error) {
 	history, err := uc.db.GetLastActionByActionType(deviceID, actionType)
 	if err != nil {
