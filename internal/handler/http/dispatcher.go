@@ -20,3 +20,13 @@ func (h *handler) HandleDispatchAction(c *gin.Context) {
 
 	WriteJson(c, nil, nil)
 }
+
+func (h *handler) HandleGetAvailableActions(c *gin.Context) {
+	actions, err := h.usecase.GetAvailableActions(c)
+	if err != nil {
+		WriteJson(c, nil, err)
+		return
+	}
+
+	WriteJson(c, actions, nil)
+}

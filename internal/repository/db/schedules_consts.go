@@ -26,11 +26,70 @@ const (
 		FROM
 			schedules
 		WHERE
-			is_active = true
-			AND next_run_at <= NOW()
-			AND last_lock_at IS NULL
+			(
+				schedule IS NULL
+				AND is_active = true
+				AND next_run_at <= NOW()
+				AND (last_run_status IS NULL OR last_run_status != 3)
+				AND last_lock_at IS NULL
+			)
+			OR
+			(
+				schedule IS NOT NULL
+				AND is_active = true
+				AND next_run_at <= NOW()
+				AND last_lock_at IS NULL
+			)
 		ORDER BY
 			next_run_at ASC
+	`
+
+	queryGetUpcomingSchedules = `
+		SELECT
+			id,
+			name,
+			description,
+			actions,
+			schedule,
+			is_active,
+			next_run_at,
+			last_lock_at,
+			last_run_at,
+			last_run_status,
+			created_at
+		FROM
+			schedules
+		WHERE
+			is_active = true
+			AND next_run_at >= NOW()
+		ORDER BY
+			next_run_at ASC
+	`
+
+	queryInsertActionSchedule = `
+		INSERT INTO
+			schedules(
+				name, 
+				description, 
+				actions, 
+				schedule, 
+				is_active, 
+				next_run_at, 
+				last_lock_at, 
+				last_run_at, 
+				last_run_status
+			)
+		VALUES(
+			:name,
+			:description,
+			:actions,
+			:schedule,
+			:is_active,
+			:next_run_at,
+			:last_lock_at,
+			:last_run_at,
+			:last_run_status
+		)
 	`
 
 	queryUpdateActionSchedule = `

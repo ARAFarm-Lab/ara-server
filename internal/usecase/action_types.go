@@ -13,10 +13,15 @@ type ActionHistory struct {
 	ActionAt   *time.Time             `json:"action_at,omitempty"`
 }
 
+type DispatcherAction struct {
+	Name   string               `json:"name"`
+	Action constants.ActionType `json:"action"`
+}
+
 type DispatcherParam struct {
-	DeviceID   int64
-	ActionType constants.ActionType
-	Value      interface{}
+	DeviceID   int64                `json:"device_id"`
+	ActionType constants.ActionType `json:"action_type"`
+	Value      interface{}          `json:"value"`
 }
 
 type InsertActionLogParam struct {
