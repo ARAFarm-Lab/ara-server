@@ -4,6 +4,7 @@ import (
 	"ara-server/internal/constants"
 	"ara-server/internal/repository/db"
 	"context"
+	"strconv"
 )
 
 func (uc *Usecase) DispatchAction(ctx context.Context, param DispatcherParam) error {
@@ -33,11 +34,27 @@ func (uc *Usecase) GetLastAction(deviceID int64, actionType constants.ActionType
 	}
 
 	return ActionHistory{
-		Value:    history.Value,
+		Value:    parseActionValue(actionType, history.Value),
 		ActionAt: &history.ActionAt,
 	}, nil
 }
 
 func (uc *Usecase) insertActionLog(param InsertActionLogParam) error {
 	return uc.db.InsertActionLog(db.ActionHistory(param))
+}
+
+func parseActionValue(actionType constants.ActionType, value interface{}) interface{} {
+	switch actionType {
+	case constants.ActionTypeBuiltInLED, constants.ActionTypeRelay:
+		val, ok := value.(string)
+		if !ok {
+			return false
+		}
+		if v, err := strconv.ParseBool(val); err == nil {
+			return v
+		}
+		return false
+	}
+
+	return nil
 }
