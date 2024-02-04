@@ -191,9 +191,9 @@ func buildSchedulePattern(scheduledAt time.Time, recurringMode ScheduleRecurring
 
 	switch recurringMode {
 	case RecurringModeHourly:
-		minute = scheduledAt.Format("5")
+		minute = scheduledAt.Format("4")
 	case RecurringModeDaily:
-		minute = scheduledAt.Format("5")
+		minute = scheduledAt.Format("4")
 		hour = scheduledAt.Format("15")
 	}
 
