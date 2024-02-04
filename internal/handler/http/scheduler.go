@@ -42,6 +42,8 @@ func (h *handler) HandleCreateSchedule(ctx *gin.Context) {
 		WriteJson(ctx, nil, err)
 		return
 	}
+
+	WriteJson(ctx, nil, nil, http.StatusCreated)
 }
 
 func (h *handler) HandleTriggerScheduler(ctx *gin.Context) {
