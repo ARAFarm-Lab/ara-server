@@ -7,7 +7,7 @@ services:
       - ENV=production
       - TZ=Asia/Jakarta
     ports:
-      - "3002:5000"
+      - "3002:8000"
     depends_on:
       db:
         condition: service_healthy
@@ -29,6 +29,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
+      TZ: Asia/Jakarta
     ports:
       - "${DB_OPEN_PORT}:5432"
     volumes:

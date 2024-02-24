@@ -34,4 +34,5 @@ func (h *handler) cronWrapper(handler func(context.Context)) func() {
 
 func (h *handler) registerHandler() {
 	h.cron.AddFunc("* * * * *", h.cronWrapper(h.HandleJobDispatcher))
+	h.cron.AddFunc("* * * * *", h.cronWrapper(h.HandleInsertDummyData))
 }

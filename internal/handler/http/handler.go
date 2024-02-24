@@ -30,6 +30,7 @@ func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
 	router.POST("/board/dispatch", h.initTracerContext, h.HandleDispatchAction)
 	router.POST("/chart", h.initTracerContext, h.HandleGetSensorChart)
 	router.POST("/scheduler/trigger", h.initTracerContext, h.HandleTriggerScheduler)
+	router.POST("/dummy_data", h.initTracerContext, h.HandleInsertDummyData)
 }
 
 func WriteJson(ctx *gin.Context, data interface{}, err error, statusCode ...int) {

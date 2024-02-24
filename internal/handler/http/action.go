@@ -31,3 +31,12 @@ func (h *handler) HandleGetLastAction(c *gin.Context) {
 	data, err := h.usecase.GetLastAction(deviceID, constants.ActionType(actionType))
 	WriteJson(c, data, err)
 }
+
+func (h *handler) HandleInsertDummyData(c *gin.Context) {
+	if err := h.usecase.InsertDummyData(); err != nil {
+		WriteJson(c, nil, err)
+		return
+	}
+
+	WriteJson(c, nil, nil)
+}

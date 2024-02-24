@@ -28,3 +28,11 @@ func (uc *Usecase) StoreSensorValue(param StoreSensorValueParam) error {
 
 	return nil
 }
+
+func (uc *Usecase) InsertDummyData() error {
+	if err := uc.db.InsertDummySensorValueData(1, constants.SoilMoistureSensor); err != nil {
+		return err
+	}
+
+	return nil
+}

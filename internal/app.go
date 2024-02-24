@@ -75,7 +75,7 @@ func main() {
 	cronHandler.InitHandler(usecase, cron)
 
 	server := http.Server{
-		Addr:    ":5000",
+		Addr:    ":8000",
 		Handler: router,
 	}
 
@@ -86,6 +86,8 @@ func main() {
 		}
 	}()
 	cron.Start()
+	log.Info(ctx, nil, nil, "Service running...")
+	fmt.Println("Service running...") // To notify docker
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
