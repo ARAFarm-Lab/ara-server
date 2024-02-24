@@ -2,4 +2,4 @@
 /config
 /.env
 /log
-__debug_bin
+__debug_bin*
