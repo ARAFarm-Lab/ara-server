@@ -13,6 +13,7 @@ services:
         condition: service_healthy
     volumes:
       - ./docker/app/log:/app/log
+      - ./docker/app/config:/app/config
   mqtt_broker:
     image: eclipse-mosquitto
     ports:
@@ -29,7 +30,7 @@ services:
       POSTGRES_USER: ${DB_USERNAME}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
       POSTGRES_DB: ${DB_NAME}
-      TZ: Asia/Jakarta
+      TZ: "Asia/Jakarta"
     ports:
       - "${DB_OPEN_PORT}:5432"
     volumes:

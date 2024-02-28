@@ -28,9 +28,10 @@ type ActionSchedule struct {
 }
 
 type CreateScheduleParam struct {
-	Name          string
-	Description   string
-	Actions       []DispatcherParam
-	ScheduledAt   time.Time
-	RecurringMode ScheduleRecurringMode
+	Name              string
+	Description       string
+	Actions           []DispatcherParam
+	ScheduledAt       time.Time
+	DurationInMinutes int
+	RecurringMode     ScheduleRecurringMode
 }
