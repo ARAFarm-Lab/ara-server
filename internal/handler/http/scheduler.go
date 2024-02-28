@@ -32,11 +32,12 @@ func (h *handler) HandleCreateSchedule(ctx *gin.Context) {
 	}
 
 	param := usecase.CreateScheduleParam{
-		Name:          request.Name,
-		Description:   request.Description,
-		Actions:       actions,
-		ScheduledAt:   request.ScheduledAt,
-		RecurringMode: usecase.ScheduleRecurringMode(request.RecurringMode),
+		Name:              request.Name,
+		Description:       request.Description,
+		Actions:           actions,
+		ScheduledAt:       request.ScheduledAt,
+		DurationInMinutes: request.Duration,
+		RecurringMode:     usecase.ScheduleRecurringMode(request.RecurringMode),
 	}
 	if err := h.usecase.CreateSchedule(ctx, param); err != nil {
 		WriteJson(ctx, nil, err)

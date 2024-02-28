@@ -32,6 +32,11 @@ func (uc *Usecase) CreateSchedule(ctx context.Context, param CreateScheduleParam
 		IsActive:    true,
 	}
 
+	if param.DurationInMinutes > 0 {
+		schedule.DurationInMinute.Valid = true
+		schedule.DurationInMinute.Int32 = int32(param.DurationInMinutes)
+	}
+
 	if param.RecurringMode != RecurringModeNone {
 		schedule.Schedule = assignSQLNullString(buildSchedulePattern(param.ScheduledAt, param.RecurringMode))
 	}
@@ -144,6 +149,10 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 		return err
 	}
 
+	// If it is time to clean up the schedule, invert the action
+	cleanUpTime := action.NextRunAt.Add(time.Duration(action.DurationInMinute.Int32) * time.Minute)
+	isCleanup := action.DurationInMinute.Valid && (timeNow.Equal(cleanUpTime) || timeNow.After(cleanUpTime))
+
 	var (
 		errs  []error
 		wg    sync.WaitGroup
@@ -151,8 +160,16 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 	)
 	for _, action := range actions {
 		wg.Add(1)
+		if isCleanup {
+			switch t := action.Value.(type) {
+			case bool:
+				action.Value = !t
+			}
+		}
+
 		go func(action DispatcherParam) {
 			defer wg.Done()
+
 			if err := uc.DispatchAction(ctx, action); err != nil {
 				log.Error(ctx, action, err, "failed to dispatch action")
 				mutex.Lock()

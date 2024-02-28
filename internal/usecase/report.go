@@ -45,8 +45,8 @@ func (uc *Usecase) GetSensorChart(param GetSensorChartParam) (SensorChartRespons
 
 	return SensorChartResponse{
 		Data:          items,
-		MinPercentage: 100 - calculatePercentage(minValue, chartConfig.Min, chartConfig.Max),
-		MaxPercentage: 100 - calculatePercentage(maxValue, chartConfig.Min, chartConfig.Max),
+		MinPercentage: calculatePercentage(minValue, chartConfig.Min, chartConfig.Max),
+		MaxPercentage: calculatePercentage(maxValue, chartConfig.Min, chartConfig.Max),
 		MinValue:      minValue,
 		MaxValue:      maxValue,
 	}, nil
@@ -61,5 +61,10 @@ func calculatePercentage(value, min, max int) int {
 		return 100
 	}
 
-	return int(float64(value-min) / float64(max-min) * 100)
+	percentage := int(float64(value-min) / float64(max-min) * 100)
+	if min < max {
+		return percentage
+	}
+
+	return 100 - percentage
 }
