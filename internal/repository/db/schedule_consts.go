@@ -10,6 +10,17 @@ const (
 			id = ANY($1)
 	`
 
+	queryDeleteScheduleByID = `
+		DELETE FROM
+			schedules
+		WHERE
+			id = $1
+	`
+
+	queryGetScheduleByID = `
+		SELECT * FROM schedules WHERE id = $1
+	`
+
 	queryGetScheduledAction = `
 		SELECT
 			id,
@@ -30,7 +41,7 @@ const (
 			(
 				schedule IS NULL
 				AND is_active = true
-				AND (next_run_at <= NOW() OR next_run_at + INTERVAL '1 minute' * duration_minute <= NOW())
+				AND (next_run_at <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute <= NOW())
 				AND (last_run_status IS NULL OR last_run_status != 3)
 				AND last_lock_at IS NULL
 			)
@@ -38,7 +49,7 @@ const (
 			(
 				schedule IS NOT NULL
 				AND is_active = true
-				AND (next_run_at <= NOW() OR next_run_at + INTERVAL '1 minute' * duration_minute <= NOW())
+				AND (next_run_at <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute <= NOW())
 				AND last_lock_at IS NULL
 			)
 		ORDER BY
@@ -52,6 +63,7 @@ const (
 			description,
 			actions,
 			schedule,
+			duration_minute,
 			is_active,
 			next_run_at,
 			last_lock_at,
@@ -62,7 +74,7 @@ const (
 			schedules
 		WHERE
 			is_active = true
-			AND next_run_at >= NOW()
+			AND next_run_at >= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute >= NOW()
 		ORDER BY
 			next_run_at ASC
 	`
@@ -102,6 +114,7 @@ const (
 			name = :name,
 			description = :description,
 			actions = :actions,
+			duration_minute = :duration_minute,
 			schedule = :schedule,
 			is_active = :is_active,
 			next_run_at = :next_run_at,

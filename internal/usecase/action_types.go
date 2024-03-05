@@ -22,6 +22,7 @@ type DispatcherParam struct {
 	DeviceID   int64                `json:"device_id"`
 	ActionType constants.ActionType `json:"action_type"`
 	Value      interface{}          `json:"value"`
+	ActionBy   constants.ActionSource
 }
 
 type InsertActionLogParam struct {

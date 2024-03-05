@@ -5,6 +5,7 @@ import (
 	"ara-server/internal/repository/db"
 	"context"
 	"strconv"
+	"time"
 )
 
 func (uc *Usecase) DispatchAction(ctx context.Context, param DispatcherParam) error {
@@ -12,6 +13,14 @@ func (uc *Usecase) DispatchAction(ctx context.Context, param DispatcherParam) er
 	if !found {
 		return errorInvalidActionType
 	}
+
+	defer uc.insertActionLog(InsertActionLogParam{
+		DeviceID:   param.DeviceID,
+		ActionType: param.ActionType,
+		Value:      param.Value,
+		ActionBy:   param.ActionBy,
+		ActionAt:   time.Now(),
+	})
 
 	return dispatch(ctx, param)
 }
