@@ -39,7 +39,7 @@ func (uc *Usecase) GetSensorChart(param GetSensorChartParam) (SensorChartRespons
 		items[index] = SensorChartItem{
 			Time:            v.Time,
 			Value:           v.Value,
-			ValuePercentage: 100 - calculatePercentage(v.Value, chartConfig.Min, chartConfig.Max),
+			ValuePercentage: calculatePercentage(v.Value, chartConfig.Min, chartConfig.Max),
 		}
 	}
 

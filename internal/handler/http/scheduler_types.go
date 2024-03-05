@@ -1,6 +1,8 @@
 package http
 
-import "time"
+import (
+	"time"
+)
 
 type CreateScheduleRequest struct {
 	Name          string              `json:"name" binding:"required"`

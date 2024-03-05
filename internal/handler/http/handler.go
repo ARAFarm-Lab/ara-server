@@ -25,11 +25,15 @@ func NewHandler(usecase *usecase.Usecase) *handler {
 func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
 	router.GET("/last-action", h.initTracerContext, h.HandleGetLastAction)
 	router.GET("/available-actions", h.initTracerContext, h.HandleGetAvailableActions)
+
 	router.GET("/schedules", h.initTracerContext, h.HandleGetUpcomingSchedules)
 	router.POST("/schedule", h.initTracerContext, h.HandleCreateSchedule)
+	router.POST("/scheduler/trigger", h.initTracerContext, h.HandleTriggerScheduler)
+	router.PATCH("/schedule", h.initTracerContext, h.HandleUpdateSchedule)
+	router.DELETE("/schedule", h.initTracerContext, h.HandleDeleteSchedule)
+
 	router.POST("/board/dispatch", h.initTracerContext, h.HandleDispatchAction)
 	router.POST("/chart", h.initTracerContext, h.HandleGetSensorChart)
-	router.POST("/scheduler/trigger", h.initTracerContext, h.HandleTriggerScheduler)
 	router.POST("/dummy_data", h.initTracerContext, h.HandleInsertDummyData)
 }
 
