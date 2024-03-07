@@ -86,8 +86,8 @@ func main() {
 		}
 	}()
 	cron.Start()
-	log.Info(ctx, nil, nil, "Service running...")
-	fmt.Println("Service running...") // To notify docker
+	log.Info(ctx, nil, nil, "Service is running...")
+	fmt.Println("Service is running...") // To notify docker
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)

@@ -3,6 +3,7 @@ package usecase
 import (
 	"ara-server/internal/constants"
 	"ara-server/internal/repository/db"
+	"ara-server/util/log"
 	"context"
 	"strconv"
 	"time"
@@ -23,6 +24,26 @@ func (uc *Usecase) DispatchAction(ctx context.Context, param DispatcherParam) er
 	})
 
 	return dispatch(ctx, param)
+}
+
+func (uc *Usecase) GetActionHistories(ctx context.Context, deviceID int64) ([]ActionHistory, error) {
+	histories, err := uc.db.GetActionHistories(ctx, deviceID)
+	if err != nil {
+		log.Error(ctx, deviceID, err, "failed to get action histories")
+	}
+
+	result := make([]ActionHistory, 0, len(histories))
+	for _, history := range histories {
+		actionTime := history.ActionAt
+		result = append(result, ActionHistory{
+			ActionType: history.ActionType,
+			Value:      parseActionValue(history.ActionType, history.Value),
+			ActionBy:   history.ActionBy,
+			ActionAt:   &actionTime,
+		})
+	}
+
+	return result, nil
 }
 
 func (uc *Usecase) GetAvailableActions(ctx context.Context) ([]DispatcherAction, error) {

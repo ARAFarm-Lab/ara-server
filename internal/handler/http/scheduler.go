@@ -63,7 +63,7 @@ func (h *handler) HandleDeleteSchedule(ctx *gin.Context) {
 
 	scheduleID, err := strconv.Atoi(scheduleIDStr)
 	if err != nil {
-		log.Error(ctx, scheduleID, err, "failed to parse schedule ID")
+		log.Error(ctx, scheduleIDStr, err, "failed to parse schedule ID")
 		WriteJson(ctx, nil, nil, http.StatusBadRequest)
 		return
 	}

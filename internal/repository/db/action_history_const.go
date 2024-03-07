@@ -1,6 +1,14 @@
 package db
 
 const (
+	queryGetActionHistory = `
+		SELECT *
+		FROM action_histories
+		WHERE device_id = $1
+		ORDER BY action_at DESC
+		LIMIT 10
+	`
+
 	queryGetLastAction = `
 		SELECT DISTINCT ON (action_type) * 
 		FROM action_histories 
