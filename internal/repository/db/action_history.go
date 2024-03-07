@@ -2,9 +2,20 @@ package db
 
 import (
 	"ara-server/internal/constants"
+	"context"
 	"database/sql"
 	"fmt"
 )
+
+func (repo *Repository) GetActionHistories(ctx context.Context, deviceID int64) ([]ActionHistory, error) {
+	var actionHistories []ActionHistory
+	err := repo.db.SelectContext(ctx, &actionHistories, queryGetActionHistory, deviceID)
+	if err != nil && err != sql.ErrNoRows {
+		return actionHistories, err
+	}
+
+	return actionHistories, nil
+}
 
 func (repo *Repository) GetLastActions(deviceID int64) ([]ActionHistory, error) {
 	query := fmt.Sprintf(queryGetLastAction, "device_id = $1 ")

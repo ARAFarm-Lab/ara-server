@@ -176,19 +176,6 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 				mutex.Unlock()
 				return
 			}
-			if err := uc.insertActionLog(InsertActionLogParam{
-				DeviceID:   action.DeviceID,
-				ActionType: action.ActionType,
-				Value:      action.Value,
-				ActionBy:   constants.ActionSourceScheduler,
-				ActionAt:   timeNow,
-			}); err != nil {
-				log.Error(ctx, action, err, "failed to insert action log")
-				mutex.Lock()
-				errs = append(errs, err)
-				mutex.Unlock()
-				return
-			}
 		}(action)
 	}
 
