@@ -147,7 +147,7 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 	}
 
 	// If it is time to clean up the schedule, invert the action
-	hasDuration := action.Description.Valid
+	hasDuration := action.DurationInMinute.Valid
 	cleanUpTime := action.NextRunAt.Add(time.Duration(action.DurationInMinute.Int32) * time.Minute)
 	isCleanUpTime := timeNow.Equal(cleanUpTime) || timeNow.After(cleanUpTime)
 
@@ -201,10 +201,8 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 					log.Error(ctx, action, err, "failed to parse cron schedule")
 				}
 
-				if hasDuration {
-					if isCleanUpTime {
-						action.NextRunAt = cronSchedule.Next(timeNow)
-					}
+				if hasDuration && !isCleanUpTime {
+					action.NextRunAt = cleanUpTime
 				} else {
 					action.NextRunAt = cronSchedule.Next(timeNow)
 				}
