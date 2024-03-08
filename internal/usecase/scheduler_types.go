@@ -23,6 +23,7 @@ type ActionSchedule struct {
 	RecurringMode ScheduleRecurringMode          `json:"recurring_mode"`
 	IsActive      bool                           `json:"is_active"`
 	ScheduledAt   time.Time                      `json:"scheduled_at"`
+	NextRunAt     time.Time                      `json:"next_run_at"`
 	LastRunAt     time.Time                      `json:"last_run_at"`
 	LastRunStatus constants.ActionScheduleStatus `json:"last_run_status"`
 	LastError     string                         `json:"last_error"`
