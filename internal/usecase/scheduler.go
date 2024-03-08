@@ -5,6 +5,7 @@ import (
 	"ara-server/internal/repository/db"
 	"ara-server/util/log"
 	"database/sql"
+	"strconv"
 	"strings"
 
 	"context"
@@ -201,9 +202,7 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 					log.Error(ctx, action, err, "failed to parse cron schedule")
 				}
 
-				if hasDuration && !isCleanUpTime {
-					action.NextRunAt = cleanUpTime
-				} else {
+				if hasDuration && isCleanUpTime || !hasDuration {
 					action.NextRunAt = cronSchedule.Next(timeNow)
 				}
 			}
@@ -274,11 +273,31 @@ func convertScheduleFromDB(ctx context.Context, schedule db.ActionSchedule) Acti
 		RecurringMode: convertCronToRecurringMode(getSQLNullString(schedule.Schedule)),
 		Duration:      int(schedule.DurationInMinute.Int32),
 		IsActive:      schedule.IsActive,
-		ScheduledAt:   schedule.NextRunAt,
+		ScheduledAt:   generateScheduleTime(schedule),
+		NextRunAt:     schedule.NextRunAt,
 		LastRunAt:     schedule.LastRunAt.Time,
 		LastRunStatus: constants.ActionScheduleStatus(schedule.LastRunStatus.Int32),
 		LastError:     schedule.LastError.String,
 	}
+}
+
+func generateScheduleTime(schedule db.ActionSchedule) time.Time {
+	pattern := getSQLNullString(schedule.Schedule)
+	recurringMode := convertCronToRecurringMode(pattern)
+	if recurringMode == RecurringModeNone || recurringMode == RecurringModeMinutely {
+		return schedule.NextRunAt
+	}
+
+	segments := strings.Split(pattern, " ")
+	minute, _ := strconv.Atoi(segments[0])
+	t := schedule.NextRunAt
+	h := t.Hour()
+	if recurringMode == RecurringModeDaily {
+		hour, _ := strconv.Atoi(segments[1])
+		h = hour
+	}
+
+	return time.Date(t.Year(), t.Month(), t.Day(), h, minute, t.Second(), t.Nanosecond(), t.Location())
 }
 
 func patchSchedule(ctx context.Context, old db.ActionSchedule, new ActionSchedule) db.ActionSchedule {

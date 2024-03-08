@@ -41,7 +41,7 @@ const (
 			(
 				schedule IS NULL
 				AND is_active = true
-				AND (next_run_at <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute <= NOW())
+				AND (next_run_at - INTERVAL '1 MINUTE' <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute - INTERVAL '1 MINUTE' <= NOW())
 				AND (last_run_status IS NULL OR last_run_status != 3)
 				AND last_lock_at IS NULL
 			)
@@ -49,7 +49,7 @@ const (
 			(
 				schedule IS NOT NULL
 				AND is_active = true
-				AND (next_run_at <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute <= NOW())
+				AND (next_run_at - INTERVAL '1 MINUTE' <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute - INTERVAL '1 MINUTE' <= NOW())
 				AND last_lock_at IS NULL
 			)
 		ORDER BY
