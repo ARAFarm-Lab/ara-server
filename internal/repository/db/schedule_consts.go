@@ -30,6 +30,7 @@ const (
 			schedule,
 			is_active,
 			next_run_at,
+			cleanup_time,
 			duration_minute,
 			last_lock_at,
 			last_run_at,
@@ -41,7 +42,7 @@ const (
 			(
 				schedule IS NULL
 				AND is_active = true
-				AND (next_run_at - INTERVAL '1 MINUTE' <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute - INTERVAL '1 MINUTE' <= NOW())
+				AND (next_run_at <= NOW() OR cleanup_time <= NOW())
 				AND (last_run_status IS NULL OR last_run_status != 3)
 				AND last_lock_at IS NULL
 			)
@@ -49,7 +50,7 @@ const (
 			(
 				schedule IS NOT NULL
 				AND is_active = true
-				AND (next_run_at - INTERVAL '1 MINUTE' <= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute - INTERVAL '1 MINUTE' <= NOW())
+				AND (next_run_at <= NOW() OR cleanup_time <= NOW())
 				AND last_lock_at IS NULL
 			)
 		ORDER BY
@@ -74,7 +75,7 @@ const (
 			schedules
 		WHERE
 			is_active = true
-			AND next_run_at >= NOW() OR next_run_at + INTERVAL '1 MINUTE' * duration_minute >= NOW()
+			AND next_run_at >= NOW() OR cleanup_time >= NOW()
 		ORDER BY
 			next_run_at ASC
 	`
@@ -118,6 +119,7 @@ const (
 			schedule = :schedule,
 			is_active = :is_active,
 			next_run_at = :next_run_at,
+			cleanup_time = :cleanup_time,
 			last_lock_at = :last_lock_at,
 			last_run_at = :last_run_at,
 			last_run_status = :last_run_status

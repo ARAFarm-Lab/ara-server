@@ -13,6 +13,7 @@ type ActionSchedule struct {
 	Schedule         sql.NullString `db:"schedule"`
 	IsActive         bool           `db:"is_active"`
 	NextRunAt        time.Time      `db:"next_run_at"`
+	CleanupTime      sql.NullTime   `db:"cleanup_time"`
 	DurationInMinute sql.NullInt32  `db:"duration_minute"`
 	LastLockAt       sql.NullTime   `db:"last_lock_at"`
 	LastRunAt        sql.NullTime   `db:"last_run_at"`
