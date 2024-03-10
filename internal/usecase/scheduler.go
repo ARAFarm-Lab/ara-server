@@ -147,10 +147,10 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 		return err
 	}
 
-	// If it is time to clean up the schedule, invert the action
+	// If it is time to clean up the schedule, revert the action
 	hasDuration := action.DurationInMinute.Valid
-	cleanUpTime := action.NextRunAt.Add(time.Duration(action.DurationInMinute.Int32) * time.Minute)
-	isCleanUpTime := timeNow.Equal(cleanUpTime) || timeNow.After(cleanUpTime)
+	cleanUpTime := action.CleanupTime.Time
+	isCleanUpTime := action.CleanupTime.Valid && (timeNow.Equal(cleanUpTime) || timeNow.After(cleanUpTime))
 
 	var (
 		errs  []error
@@ -202,8 +202,22 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 					log.Error(ctx, action, err, "failed to parse cron schedule")
 				}
 
-				if hasDuration && isCleanUpTime || !hasDuration {
+				if !isCleanUpTime {
 					action.NextRunAt = cronSchedule.Next(timeNow)
+				}
+			}
+
+			// Set the next cleanup time if it is clean uptime or the schedule has a duration but the cleanup time is null
+			if isCleanUpTime || (action.DurationInMinute.Valid && !action.CleanupTime.Valid) {
+				scheduleTime := timeNow
+				if isCleanUpTime {
+					scheduleTime = action.NextRunAt
+				}
+
+				cleanUpTime = scheduleTime.Add(time.Duration(action.DurationInMinute.Int32) * time.Minute)
+				action.CleanupTime = sql.NullTime{
+					Valid: true,
+					Time:  time.Date(cleanUpTime.Year(), cleanUpTime.Month(), cleanUpTime.Day(), cleanUpTime.Hour(), cleanUpTime.Minute(), 0, 0, cleanUpTime.Location()),
 				}
 			}
 		} else {
