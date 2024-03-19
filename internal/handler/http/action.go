@@ -1,7 +1,6 @@
 package http
 
 import (
-	"ara-server/internal/constants"
 	"ara-server/util/log"
 	"errors"
 	"net/http"
@@ -35,9 +34,9 @@ func (h *handler) HandleGetActionHistory(ctx *gin.Context) {
 
 func (h *handler) HandleGetLastAction(c *gin.Context) {
 	deviceIDStr := c.Query("device_id")
-	actionTypeStr := c.Query("action_type")
-	if deviceIDStr == "" || actionTypeStr == "" {
-		WriteJson(c, nil, errors.New("device_id and sensor_type are required"))
+	actuatorIDStr := c.Query("actuator_id")
+	if deviceIDStr == "" || actuatorIDStr == "" {
+		WriteJson(c, nil, errors.New("device_id and actuator_id are required"))
 		return
 	}
 
@@ -47,13 +46,13 @@ func (h *handler) HandleGetLastAction(c *gin.Context) {
 		return
 	}
 
-	actionType, err := strconv.ParseInt(actionTypeStr, 10, 64)
+	actuatorID, err := strconv.ParseInt(actuatorIDStr, 10, 64)
 	if err != nil {
 		WriteJson(c, nil, err)
 		return
 	}
 
-	data, err := h.usecase.GetLastAction(deviceID, constants.ActionType(actionType))
+	data, err := h.usecase.GetLastAction(deviceID, actuatorID)
 	WriteJson(c, data, err)
 }
 

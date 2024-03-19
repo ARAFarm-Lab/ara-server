@@ -15,18 +15,20 @@ const (
 )
 
 type ActionSchedule struct {
-	ID            int                            `json:"id"`
-	Name          string                         `json:"name"`
-	Description   string                         `json:"description"`
-	Actions       []DispatcherParam              `json:"actions"`
-	Duration      int                            `json:"duration"`
-	RecurringMode ScheduleRecurringMode          `json:"recurring_mode"`
-	IsActive      bool                           `json:"is_active"`
-	ScheduledAt   time.Time                      `json:"scheduled_at"`
-	NextRunAt     time.Time                      `json:"next_run_at"`
-	LastRunAt     time.Time                      `json:"last_run_at"`
-	LastRunStatus constants.ActionScheduleStatus `json:"last_run_status"`
-	LastError     string                         `json:"last_error"`
+	ID                   int                            `json:"id"`
+	Name                 string                         `json:"name"`
+	Description          string                         `json:"description"`
+	Actions              []DispatcherParam              `json:"actions"`
+	Duration             int                            `json:"duration"`
+	RecurringMode        ScheduleRecurringMode          `json:"recurring_mode"`
+	IsActive             bool                           `json:"is_active"`
+	IsUpcomingRunCleanup bool                           `json:"is_upcoming_run_cleanup"` // indicate whether the next run is cleanup or not, only on the one-time schedule
+	CleanupTime          *time.Time                     `json:"cleanup_time"`
+	ScheduledAt          time.Time                      `json:"scheduled_at"`
+	NextRunAt            time.Time                      `json:"next_run_at"`
+	LastRunAt            time.Time                      `json:"last_run_at"`
+	LastRunStatus        constants.ActionScheduleStatus `json:"last_run_status"`
+	LastError            string                         `json:"last_error"`
 }
 
 type CreateScheduleParam struct {

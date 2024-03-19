@@ -38,21 +38,10 @@ const (
 			created_at
 		FROM
 			schedules
-		WHERE
-			(
-				schedule IS NULL
-				AND is_active = true
-				AND (next_run_at <= NOW() OR cleanup_time <= NOW())
-				AND (last_run_status IS NULL OR last_run_status != 3)
-				AND last_lock_at IS NULL
-			)
-			OR
-			(
-				schedule IS NOT NULL
-				AND is_active = true
-				AND (next_run_at <= NOW() OR cleanup_time <= NOW())
-				AND last_lock_at IS NULL
-			)
+		WHERE 
+			is_active = true
+			AND (next_run_at <= NOW() OR cleanup_time <= NOW())
+			AND last_lock_at IS NULL
 		ORDER BY
 			next_run_at ASC
 	`
@@ -65,6 +54,7 @@ const (
 			actions,
 			schedule,
 			duration_minute,
+			cleanup_time,
 			is_active,
 			next_run_at,
 			last_lock_at,
