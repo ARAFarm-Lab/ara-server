@@ -21,7 +21,7 @@ jobs:
           port: 22
           command: |
             sudo git clone https://github.com/ARAFarm-Lab/ara-server
-            sudo cd ~/ara-server
+            cd ~/ara-server
             sudo git pull origin main
             sudo docker compose up -d migrate
             sudo docker compose up --build -d app
