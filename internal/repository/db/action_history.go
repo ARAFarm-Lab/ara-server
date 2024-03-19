@@ -1,7 +1,6 @@
 package db
 
 import (
-	"ara-server/internal/constants"
 	"context"
 	"database/sql"
 	"fmt"
@@ -29,11 +28,11 @@ func (repo *Repository) GetLastActions(deviceID int64) ([]ActionHistory, error) 
 	return actionHistories, nil
 }
 
-func (repo *Repository) GetLastActionByActionType(deviceID int64, actionType constants.ActionType) (ActionHistory, error) {
-	query := fmt.Sprintf(queryGetLastAction, "device_id = $1 AND action_type = $2 ")
+func (repo *Repository) GetLastActionByActuatorID(deviceID int64, actuatorID int64) (ActionHistory, error) {
+	query := fmt.Sprintf(queryGetLastAction, "device_id = $1 AND actuator_id = $2 ")
 
 	var actionHistory ActionHistory
-	err := repo.db.Get(&actionHistory, query, deviceID, actionType)
+	err := repo.db.Get(&actionHistory, query, deviceID, actuatorID)
 	if err != nil && err != sql.ErrNoRows {
 		return actionHistory, err
 	}
@@ -42,6 +41,6 @@ func (repo *Repository) GetLastActionByActionType(deviceID int64, actionType con
 }
 
 func (repo *Repository) InsertActionLog(param ActionHistory) error {
-	_, err := repo.db.Exec(queryInsertActionLog, param.DeviceID, param.ActionType, param.Value, param.ActionBy, param.ActionAt)
+	_, err := repo.db.Exec(queryInsertActionLog, param.ActuatorID, param.Value, param.ActionBy, param.ActionAt)
 	return err
 }

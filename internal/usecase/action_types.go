@@ -6,28 +6,29 @@ import (
 )
 
 type ActionHistory struct {
-	DeviceID   int64                  `json:"device_id,omitempty"`
-	ActionType constants.ActionType   `json:"action_type,omitempty"`
+	ActuatorID int64                  `json:"actuator_id,omitempty"`
 	Value      interface{}            `json:"value,omitempty"`
 	ActionBy   constants.ActionSource `json:"action_by,omitempty"`
 	ActionAt   *time.Time             `json:"action_at,omitempty"`
+	Action     DispatcherAction       `json:"action,omitempty"`
 }
 
 type DispatcherAction struct {
-	Name   string               `json:"name"`
-	Action constants.ActionType `json:"action"`
+	ID   int64                `json:"id"`
+	Type constants.ActionType `json:"type"`
+	Name string               `json:"name"`
+	Icon string               `json:"icon"`
 }
 
 type DispatcherParam struct {
-	DeviceID   int64                `json:"device_id"`
-	ActionType constants.ActionType `json:"action_type"`
-	Value      interface{}          `json:"value"`
+	DeviceID   int64       `json:"device_id"`
+	ActuatorID int64       `json:"actuator_id"`
+	Value      interface{} `json:"value"`
 	ActionBy   constants.ActionSource
 }
 
 type InsertActionLogParam struct {
-	DeviceID   int64
-	ActionType constants.ActionType
+	ActuatorID int64
 	Value      interface{}
 	ActionBy   constants.ActionSource
 	ActionAt   time.Time

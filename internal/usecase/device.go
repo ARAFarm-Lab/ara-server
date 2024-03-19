@@ -1,7 +1,6 @@
 package usecase
 
 import (
-	"ara-server/internal/constants"
 	"ara-server/util/log"
 	"context"
 	"strconv"
@@ -14,9 +13,25 @@ func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {
 		return
 	}
 
-	result := make([][]interface{}, 0, len(histories))
+	actuators, err := uc.db.GetActiveActuators(ctx, deviceID)
+	if err != nil {
+		log.Error(ctx, deviceID, err, "error getting actuator list")
+		return
+	}
+
+	states := make([][]interface{}, 0, len(histories))
 	for _, history := range histories {
-		result = append(result, []interface{}{history.ActionType, history.Value})
+		states = append(states, []interface{}{history.ActionType, history.Value})
+	}
+
+	pins := make([][]interface{}, 0, len(actuators))
+	for _, actuator := range actuators {
+		pins = append(pins, []interface{}{actuator.ID, actuator.PinNumber})
+	}
+
+	result := deviceConfig{
+		Actuators: pins,
+		Values:    states,
 	}
 
 	uc.mq.PublishJSON("dcs-"+strconv.FormatInt(deviceID, 10), result)
@@ -29,5 +44,5 @@ func (uc *Usecase) toggleRelay(ctx context.Context, param DispatcherParam) error
 		return errorInvalidActionValue
 	}
 
-	return uc.mq.PublishJSON(generateDeviceTopic(param.DeviceID), []interface{}{constants.ActionTypeRelay, value})
+	return uc.mq.PublishJSON(generateDeviceTopic(param.DeviceID), []interface{}{param.ActuatorID, value})
 }

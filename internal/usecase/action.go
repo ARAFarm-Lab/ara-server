@@ -10,14 +10,23 @@ import (
 )
 
 func (uc *Usecase) DispatchAction(ctx context.Context, param DispatcherParam) error {
-	dispatch, found := uc.actionDispatcherMap[param.ActionType]
+	actuator, err := uc.db.GetActuatorByID(ctx, param.ActuatorID)
+	if err != nil {
+		log.Error(ctx, param, err, "failed getting actuator")
+		return err
+	}
+
+	if actuator.ID == 0 {
+		return errorActuatorNotFound
+	}
+
+	dispatch, found := uc.actionDispatcherMap[actuator.ActionType]
 	if !found {
 		return errorInvalidActionType
 	}
 
 	defer uc.insertActionLog(InsertActionLogParam{
-		DeviceID:   param.DeviceID,
-		ActionType: param.ActionType,
+		ActuatorID: param.ActuatorID,
 		Value:      param.Value,
 		ActionBy:   param.ActionBy,
 		ActionAt:   time.Now(),
@@ -30,31 +39,49 @@ func (uc *Usecase) GetActionHistories(ctx context.Context, deviceID int64) ([]Ac
 	histories, err := uc.db.GetActionHistories(ctx, deviceID)
 	if err != nil {
 		log.Error(ctx, deviceID, err, "failed to get action histories")
+		return nil, err
 	}
 
 	result := make([]ActionHistory, 0, len(histories))
 	for _, history := range histories {
 		actionTime := history.ActionAt
 		result = append(result, ActionHistory{
-			ActionType: history.ActionType,
-			Value:      parseActionValue(history.ActionType, history.Value),
-			ActionBy:   history.ActionBy,
-			ActionAt:   &actionTime,
+			Value:    parseActionValue(history.ActionType, history.Value),
+			ActionBy: history.ActionBy,
+			ActionAt: &actionTime,
+			Action: DispatcherAction{
+				ID:   history.ActuatorID,
+				Type: history.ActionType,
+				Name: history.Name,
+				Icon: history.Icon,
+			},
 		})
 	}
 
 	return result, nil
 }
 
-func (uc *Usecase) GetAvailableActions(ctx context.Context) ([]DispatcherAction, error) {
-	return []DispatcherAction{
-		{Name: "Built In LED", Action: constants.ActionTypeBuiltInLED},
-		{Name: "Relay", Action: constants.ActionTypeRelay},
-	}, nil
+func (uc *Usecase) GetAvailableActions(ctx context.Context, deviceID int64) ([]DispatcherAction, error) {
+	actuators, err := uc.db.GetActiveActuators(ctx, deviceID)
+	if err != nil {
+		log.Error(ctx, deviceID, err, "failed getting active actuators")
+		return nil, err
+	}
+
+	result := make([]DispatcherAction, 0, len(actuators))
+	for _, actuator := range actuators {
+		result = append(result, DispatcherAction{
+			ID:   actuator.ID,
+			Type: actuator.ActionType,
+			Name: actuator.Name,
+			Icon: actuator.Icon,
+		})
+	}
+	return result, nil
 }
 
-func (uc *Usecase) GetLastAction(deviceID int64, actionType constants.ActionType) (ActionHistory, error) {
-	history, err := uc.db.GetLastActionByActionType(deviceID, actionType)
+func (uc *Usecase) GetLastAction(deviceID int64, actuatorID int64) (ActionHistory, error) {
+	history, err := uc.db.GetLastActionByActuatorID(deviceID, actuatorID)
 	if err != nil {
 		return ActionHistory{}, err
 	}
@@ -64,13 +91,18 @@ func (uc *Usecase) GetLastAction(deviceID int64, actionType constants.ActionType
 	}
 
 	return ActionHistory{
-		Value:    parseActionValue(actionType, history.Value),
+		Value:    parseActionValue(history.ActionType, history.Value),
 		ActionAt: &history.ActionAt,
 	}, nil
 }
 
 func (uc *Usecase) insertActionLog(param InsertActionLogParam) error {
-	return uc.db.InsertActionLog(db.ActionHistory(param))
+	return uc.db.InsertActionLog(db.ActionHistory{
+		ActuatorID: param.ActuatorID,
+		Value:      param.Value,
+		ActionBy:   param.ActionBy,
+		ActionAt:   param.ActionAt,
+	})
 }
 
 func parseActionValue(actionType constants.ActionType, value interface{}) interface{} {

@@ -1,7 +1,6 @@
 package http
 
 import (
-	"ara-server/internal/constants"
 	"ara-server/internal/usecase"
 	"ara-server/util/log"
 	"net/http"
@@ -32,9 +31,8 @@ func (h *handler) HandleCreateSchedule(ctx *gin.Context) {
 	for i, action := range request.Actions {
 		actions[i] = usecase.DispatcherParam{
 			DeviceID:   action.DeviceID,
-			ActionType: action.ActionType,
+			ActuatorID: action.ActuatorID,
 			Value:      action.Value,
-			ActionBy:   constants.ActionSourceUser,
 		}
 	}
 

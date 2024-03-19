@@ -16,6 +16,7 @@ import (
 )
 
 var (
+	errorActuatorNotFound        = errors.New("actuator not found")
 	errorDispatchSchedulerFailed = errors.New("dispatch scheduler failed")
 	errorInvalidActionType       = errors.New("invalid action type")
 	errorInvalidActionValue      = errors.New("invalid action value")
