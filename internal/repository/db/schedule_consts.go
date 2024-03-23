@@ -42,8 +42,6 @@ const (
 			is_active = true
 			AND (next_run_at <= NOW() OR cleanup_time <= NOW())
 			AND last_lock_at IS NULL
-		ORDER BY
-			next_run_at ASC
 	`
 
 	queryGetUpcomingSchedules = `
@@ -67,7 +65,7 @@ const (
 			is_active = true
 			AND next_run_at >= NOW() OR cleanup_time >= NOW()
 		ORDER BY
-			next_run_at ASC
+			COALESCE(next_run_at, '0001-12-31'::TIMESTAMP) ASC, COALESCE(cleanup_time, '0001-12-31'::TIMESTAMP) ASC
 	`
 
 	queryInsertActionSchedule = `

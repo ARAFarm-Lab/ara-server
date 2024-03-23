@@ -196,7 +196,7 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 		if err == nil {
 			status = constants.ScheduleStatusSuccess
 
-			// Calculate the next run time based on the schedule pattern
+			// Calculate the next run time and the cleanup time based on the schedule pattern
 			if action.Schedule.Valid {
 				schedulePattern := getSQLNullString(action.Schedule)
 				cronSchedule, err := uc.cronParser.Parse(schedulePattern)
@@ -204,10 +204,12 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 					log.Error(ctx, action, err, "failed to parse cron schedule")
 				}
 
+				// Set next run time if it is clean up time
 				if !isCleanUpTime {
 					nextRunTime := cronSchedule.Next(timeNow)
 					action.NextRunAt = assignSQLNullTime(&nextRunTime)
 				}
+				action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, action.NextRunAt.Time))
 			} else {
 				if isCleanUpTime {
 					// Delete the schedule after clean up since the schedule is no longer used
@@ -216,27 +218,7 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 					}
 				} else {
 					action.NextRunAt = assignSQLNullTime(nil)
-				}
-			}
-
-			// Set the next cleanup time if it is cleanup time or the schedule has a duration but the cleanup time is null
-			if isCleanUpTime || (action.DurationInMinute.Valid && !action.CleanupTime.Valid) {
-				scheduleTime := timeNow
-				if isCleanUpTime {
-					scheduleTime = action.NextRunAt.Time
-				}
-
-				cleanUpTime = scheduleTime.Add(time.Duration(action.DurationInMinute.Int32) * time.Minute)
-				action.CleanupTime = sql.NullTime{
-					Valid: true,
-					Time:  time.Date(cleanUpTime.Year(), cleanUpTime.Month(), cleanUpTime.Day(), cleanUpTime.Hour(), cleanUpTime.Minute(), 0, 0, cleanUpTime.Location()),
-				}
-			}
-
-			// If it is time for one-time schedule cleanup time, remove the schedule upon the cleanup
-			if isCleanUpTime && !action.Schedule.Valid {
-				if err = uc.db.DeleteScheduleByID(ctx, action.ID); err != nil {
-					log.Error(ctx, action, err, "failed to delete schedule")
+					action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, timeNow))
 				}
 			}
 		} else {
@@ -271,6 +253,16 @@ func buildSchedulePattern(scheduledAt time.Time, recurringMode ScheduleRecurring
 	return minute + " " + hour + " * * *"
 }
 
+func calculateCleanupTime(action db.ActionSchedule, timeNow time.Time) *time.Time {
+	if !action.DurationInMinute.Valid {
+		return nil
+	}
+
+	duration := action.DurationInMinute.Int32
+	cleanUpTime := timeNow.Add(time.Duration(duration) * time.Minute)
+	return &cleanUpTime
+}
+
 func convertCronToRecurringMode(schedule string) ScheduleRecurringMode {
 	if schedule == "" {
 		return RecurringModeNone
@@ -298,28 +290,26 @@ func convertScheduleFromDB(ctx context.Context, schedule db.ActionSchedule) Acti
 		log.Error(ctx, schedule, err, "failed to unmarshal actions")
 	}
 
-	timeNow := time.Now()
 	result := ActionSchedule{
-		ID:                   schedule.ID,
-		Name:                 schedule.Name,
-		Description:          getSQLNullString(schedule.Description),
-		Actions:              actions,
-		RecurringMode:        convertCronToRecurringMode(getSQLNullString(schedule.Schedule)),
-		Duration:             int(schedule.DurationInMinute.Int32),
-		IsActive:             schedule.IsActive,
-		IsUpcomingRunCleanup: timeNow.After(schedule.NextRunAt.Time) && schedule.CleanupTime.Time.After(timeNow),
-		ScheduledAt:          generateScheduleTime(schedule),
-		LastRunAt:            schedule.LastRunAt.Time,
-		LastRunStatus:        constants.ActionScheduleStatus(schedule.LastRunStatus.Int32),
-		LastError:            schedule.LastError.String,
+		ID:            schedule.ID,
+		Name:          schedule.Name,
+		Description:   getSQLNullString(schedule.Description),
+		Actions:       actions,
+		RecurringMode: convertCronToRecurringMode(getSQLNullString(schedule.Schedule)),
+		Duration:      int(schedule.DurationInMinute.Int32),
+		IsActive:      schedule.IsActive,
+		ScheduledAt:   generateScheduleTime(schedule),
+		LastRunAt:     schedule.LastRunAt.Time,
+		LastRunStatus: constants.ActionScheduleStatus(schedule.LastRunStatus.Int32),
+		LastError:     schedule.LastError.String,
 	}
 
 	if schedule.NextRunAt.Valid {
 		result.NextRunAt = schedule.NextRunAt.Time
 	}
 
-	if schedule.CleanupTime.Valid {
-		result.CleanupTime = &schedule.CleanupTime.Time
+	if schedule.CleanupTime.Valid && schedule.CleanupTime.Time.Before(schedule.NextRunAt.Time) || !schedule.NextRunAt.Valid {
+		result.NextRunAt = schedule.CleanupTime.Time
 	}
 
 	return result
