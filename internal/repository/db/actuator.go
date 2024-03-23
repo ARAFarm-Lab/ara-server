@@ -37,3 +37,16 @@ func (repo *Repository) InsertActuator(ctx context.Context, actuator Actuator) e
 
 	return nil
 }
+
+func (repo *Repository) UpdateActuator(ctx context.Context, actuator Actuator) error {
+	query, args, err := sqlx.Named(queryUpdateActuatorByID, actuator)
+	if err != nil {
+		return err
+	}
+
+	if _, err = repo.db.ExecContext(ctx, repo.db.Rebind(query), args...); err != nil {
+		return err
+	}
+
+	return nil
+}

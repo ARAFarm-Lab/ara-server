@@ -28,4 +28,15 @@ const (
 			:icon
 		);
 	`
+
+	queryUpdateActuatorByID = `
+		UPDATE device_actuators
+		SET
+			device_id = :device_id,
+			pin_number = :pin_number,
+			action_type = :action_type,
+			name = :name,
+			icon = :icon
+		WHERE id = :id
+	`
 )

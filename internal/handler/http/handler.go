@@ -28,7 +28,9 @@ func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
 	router.GET("/action/history", h.initTracerContext, h.HandleGetActionHistory)
 	router.POST("/action/dispatch", h.initTracerContext, h.HandleDispatchAction)
 
+	router.GET("/actuators", h.initTracerContext, h.HandleGetActiveActuators)
 	router.POST("/actuator", h.initTracerContext, h.HandleInsertActuator)
+	router.PATCH("/actuator", h.initTracerContext, h.HandleUpdateActuator)
 
 	router.GET("/schedules", h.initTracerContext, h.HandleGetUpcomingSchedules)
 	router.POST("/schedule", h.initTracerContext, h.HandleCreateSchedule)
