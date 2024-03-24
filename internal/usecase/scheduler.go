@@ -42,7 +42,19 @@ func (uc *Usecase) CreateSchedule(ctx context.Context, param CreateScheduleParam
 	}
 
 	if param.RecurringMode != RecurringModeNone {
-		schedule.Schedule = assignSQLNullString(buildSchedulePattern(param.ScheduledAt, param.RecurringMode))
+		schedulePattern := buildSchedulePattern(param.ScheduledAt, param.RecurringMode)
+		schedule.Schedule = assignSQLNullString(schedulePattern)
+		cronPattern, err := uc.cronParser.Parse(schedulePattern)
+		if err != nil {
+			log.Error(ctx, map[string]interface{}{
+				"schedule": schedule,
+				"pattern":  schedulePattern,
+			}, err, "failed to parse cron pattern")
+			return err
+		}
+		nextRunTime := cronPattern.Next(time.Now()) // ensure the next run is after the time now
+		nextRun := time.Date(nextRunTime.Year(), nextRunTime.Month(), nextRunTime.Day(), nextRunTime.Hour(), nextRunTime.Minute(), 0, 0, nextRunTime.Location())
+		schedule.NextRunAt = assignSQLNullTime(&nextRun)
 	}
 
 	if err := uc.db.InsertActionSchedule(schedule); err != nil {
