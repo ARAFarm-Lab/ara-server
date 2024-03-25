@@ -220,8 +220,10 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 				if !isCleanUpTime {
 					nextRunTime := cronSchedule.Next(timeNow)
 					action.NextRunAt = assignSQLNullTime(&nextRunTime)
+					action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, timeNow))
+				} else {
+					action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, action.NextRunAt.Time))
 				}
-				action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, action.NextRunAt.Time))
 			} else {
 				if isCleanUpTime {
 					// Delete the schedule after clean up since the schedule is no longer used
