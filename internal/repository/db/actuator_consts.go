@@ -4,13 +4,14 @@ const (
 	queryGetActiveActuators = `
 		SELECT *
 		FROM device_actuators
-		WHERE device_id = $1 AND is_active = true;
+		WHERE device_id = $1 AND is_active = true
+		ORDER BY terminal_number ASC;
 	`
 
 	queryGetActuatorByID = `
 		SELECT *
 		FROM device_actuators
-		WHERE id = $1
+		WHERE id = $1;
 	`
 
 	queryInsertActuator = `
@@ -37,6 +38,6 @@ const (
 			action_type = :action_type,
 			name = :name,
 			icon = :icon
-		WHERE id = :id
+		WHERE id = :id;
 	`
 )
