@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"ara-server/internal/repository/db"
 	"ara-server/util/log"
 	"context"
 	"strconv"
@@ -9,13 +10,18 @@ import (
 func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {
 	histories, err := uc.db.GetLastActions(deviceID)
 	if err != nil {
-		log.Error(ctx, deviceID, err, "error getting last action")
+		log.Error(ctx, deviceID, err, "failed getting last action")
 		return
 	}
 
-	actuators, err := uc.db.GetActiveActuators(ctx, deviceID)
+	actuators, err := uc.db.GetActuatorsByFilter(ctx, []db.GetActuatorsFilter{
+		{
+			Name:  "is_active",
+			Value: true,
+		},
+	})
 	if err != nil {
-		log.Error(ctx, deviceID, err, "error getting actuator list")
+		log.Error(ctx, deviceID, err, "failed getting actuator list")
 		return
 	}
 

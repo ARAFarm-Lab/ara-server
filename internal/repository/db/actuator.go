@@ -3,13 +3,17 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 )
 
-func (repo *Repository) GetActiveActuators(ctx context.Context, deviceID int64) ([]Actuator, error) {
+func (repo *Repository) GetActuatorsByFilter(ctx context.Context, filter []GetActuatorsFilter) ([]Actuator, error) {
+	query, args := buildGetActuatorsByFilterQuery(filter)
+
 	var result []Actuator
-	if err := repo.db.SelectContext(ctx, &result, queryGetActiveActuators, deviceID); err != nil && err != sql.ErrNoRows {
+	if err := repo.db.SelectContext(ctx, &result, query, args...); err != nil && err != sql.ErrNoRows {
 		return nil, err
 	}
 
@@ -49,4 +53,19 @@ func (repo *Repository) UpdateActuator(ctx context.Context, actuator Actuator) e
 	}
 
 	return nil
+}
+
+func buildGetActuatorsByFilterQuery(filter []GetActuatorsFilter) (string, []interface{}) {
+	if len(filter) == 0 {
+		return fmt.Sprintf(queryGetActuatorsByFilter, ""), nil
+	}
+
+	args := make([]interface{}, 0, len(filter))
+	clauses := make([]string, 0, len(filter))
+	for index, item := range filter {
+		args = append(args, item.Value)
+		clauses = append(clauses, fmt.Sprintf("%s = $%d", item.Name, index+1))
+	}
+
+	return fmt.Sprintf(queryGetActuatorsByFilter, "WHERE "+strings.Join(clauses, " AND ")+" "), args
 }
