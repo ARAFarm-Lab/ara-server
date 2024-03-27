@@ -1,10 +1,10 @@
 package db
 
 const (
-	queryGetActiveActuators = `
+	queryGetActuatorsByFilter = `
 		SELECT *
 		FROM device_actuators
-		WHERE device_id = $1 AND is_active = true
+		%s
 		ORDER BY terminal_number ASC;
 	`
 
@@ -37,7 +37,8 @@ const (
 			pin_number = :pin_number,
 			action_type = :action_type,
 			name = :name,
-			icon = :icon
+			icon = :icon,
+			is_active = :is_active
 		WHERE id = :id;
 	`
 )

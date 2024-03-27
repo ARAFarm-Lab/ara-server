@@ -62,9 +62,14 @@ func (uc *Usecase) GetActionHistories(ctx context.Context, deviceID int64) ([]Ac
 }
 
 func (uc *Usecase) GetAvailableActions(ctx context.Context, deviceID int64) ([]DispatcherAction, error) {
-	actuators, err := uc.db.GetActiveActuators(ctx, deviceID)
+	actuators, err := uc.db.GetActuatorsByFilter(ctx, []db.GetActuatorsFilter{
+		{
+			Name:  "is_active",
+			Value: true,
+		},
+	})
 	if err != nil {
-		log.Error(ctx, deviceID, err, "failed getting active actuators")
+		log.Error(ctx, deviceID, err, "failed getting actuators")
 		return nil, err
 	}
 

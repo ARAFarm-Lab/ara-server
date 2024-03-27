@@ -6,10 +6,10 @@ import (
 	"context"
 )
 
-func (uc *Usecase) GetActiveActuator(ctx context.Context, deviceID int64) ([]Actuator, error) {
-	actuators, err := uc.db.GetActiveActuators(ctx, deviceID)
+func (uc *Usecase) GetActuators(ctx context.Context, deviceID int64) ([]Actuator, error) {
+	actuators, err := uc.db.GetActuatorsByFilter(ctx, nil)
 	if err != nil {
-		log.Error(ctx, deviceID, err, "failed to get active actuators")
+		log.Error(ctx, deviceID, err, "failed to get actuators")
 		return nil, err
 	}
 

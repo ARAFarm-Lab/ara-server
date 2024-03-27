@@ -7,7 +7,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (h *handler) HandleGetActiveActuators(ctx *gin.Context) {
+func (h *handler) HandleGetActuators(ctx *gin.Context) {
 	deviceIDStr := ctx.Query("device_id")
 	deviceID, err := strconv.ParseInt(deviceIDStr, 10, 64)
 	if err != nil {
@@ -15,7 +15,7 @@ func (h *handler) HandleGetActiveActuators(ctx *gin.Context) {
 		return
 	}
 
-	result, err := h.usecase.GetActiveActuator(ctx, deviceID)
+	result, err := h.usecase.GetActuators(ctx, deviceID)
 	if err != nil {
 		WriteJson(ctx, nil, err)
 		return

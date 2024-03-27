@@ -12,3 +12,8 @@ type Actuator struct {
 	Icon           string               `db:"icon"`
 	IsActive       bool                 `db:"is_active"`
 }
+
+type GetActuatorsFilter struct {
+	Name  string
+	Value interface{}
+}
