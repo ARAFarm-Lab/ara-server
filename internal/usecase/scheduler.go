@@ -313,9 +313,12 @@ func convertScheduleFromDB(ctx context.Context, schedule db.ActionSchedule) Acti
 		Duration:      int(schedule.DurationInMinute.Int32),
 		IsActive:      schedule.IsActive,
 		ScheduledAt:   generateScheduleTime(schedule),
-		LastRunAt:     schedule.LastRunAt.Time,
 		LastRunStatus: constants.ActionScheduleStatus(schedule.LastRunStatus.Int32),
 		LastError:     schedule.LastError.String,
+	}
+
+	if !schedule.LastRunAt.Time.IsZero() {
+		result.LastRunAt = &schedule.LastRunAt.Time
 	}
 
 	if schedule.NextRunAt.Valid {
