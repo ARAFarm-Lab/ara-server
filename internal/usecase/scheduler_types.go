@@ -26,7 +26,7 @@ type ActionSchedule struct {
 	CleanupTime          *time.Time                     `json:"cleanup_time"`
 	ScheduledAt          time.Time                      `json:"scheduled_at"`
 	NextRunAt            time.Time                      `json:"next_run_at"`
-	LastRunAt            time.Time                      `json:"last_run_at"`
+	LastRunAt            time.Time                      `json:"last_run_at,omitempty"`
 	LastRunStatus        constants.ActionScheduleStatus `json:"last_run_status"`
 	LastError            string                         `json:"last_error"`
 }
