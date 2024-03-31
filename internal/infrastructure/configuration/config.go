@@ -2,7 +2,6 @@ package configuration
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"strings"
 
@@ -31,7 +30,7 @@ func InitializeConfig() (Config, error) {
 	}
 
 	configPath := fmt.Sprintf("%s/config/config.%s.yaml", workingdir, env)
-	yamlFile, err := ioutil.ReadFile(configPath)
+	yamlFile, err := os.ReadFile(configPath)
 	if err != nil {
 		return Config{}, err
 	}
