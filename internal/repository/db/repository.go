@@ -2,6 +2,8 @@ package db
 
 import (
 	"ara-server/internal/infrastructure"
+	"context"
+	"database/sql"
 
 	"github.com/jmoiron/sqlx"
 )
@@ -16,6 +18,10 @@ func NewRepository(db *sqlx.DB, infra *infrastructure.Infrastructure) *Repositor
 		db:    db,
 		infra: infra,
 	}
+}
+
+func (repo *Repository) BeginTx(ctx context.Context) (*sql.Tx, error) {
+	return repo.db.BeginTx(ctx, nil)
 }
 
 func (repo *Repository) Rebind(query string) string {
