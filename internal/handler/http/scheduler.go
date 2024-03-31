@@ -2,6 +2,7 @@ package http
 
 import (
 	"ara-server/internal/usecase"
+	"ara-server/util/log"
 	"net/http"
 	"strconv"
 
@@ -21,7 +22,8 @@ func (h *handler) HandleGetUpcomingSchedules(ctx *gin.Context) {
 func (h *handler) HandleCreateSchedule(ctx *gin.Context) {
 	var request CreateScheduleRequest
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		WriteJson(ctx, nil, errInvalidRequest, http.StatusBadRequest)
+		log.Error(ctx, nil, err, "failed to bind json")
+		WriteJson(ctx, nil, errInvalidRequestBody, http.StatusBadRequest)
 		return
 	}
 
@@ -59,6 +61,7 @@ func (h *handler) HandleDeleteSchedule(ctx *gin.Context) {
 
 	scheduleID, err := strconv.Atoi(scheduleIDStr)
 	if err != nil {
+		log.Error(ctx, scheduleIDStr, err, "failed to parse schedule ID")
 		WriteJson(ctx, nil, nil, http.StatusBadRequest)
 		return
 	}
@@ -74,7 +77,8 @@ func (h *handler) HandleDeleteSchedule(ctx *gin.Context) {
 func (h *handler) HandleUpdateSchedule(ctx *gin.Context) {
 	var request usecase.ActionSchedule
 	if err := ctx.ShouldBindJSON(&request); err != nil {
-		WriteJson(ctx, nil, errInvalidRequest, http.StatusBadRequest)
+		log.Error(ctx, nil, err, "failed to bind json")
+		WriteJson(ctx, nil, errInvalidRequestBody, http.StatusBadRequest)
 		return
 	}
 

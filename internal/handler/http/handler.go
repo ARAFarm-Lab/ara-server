@@ -1,7 +1,6 @@
 package http
 
 import (
-	"ara-server/internal/infrastructure"
 	"ara-server/internal/usecase"
 	"errors"
 	"net/http"
@@ -10,17 +9,15 @@ import (
 )
 
 type handler struct {
-	infra   *infrastructure.Infrastructure
 	usecase *usecase.Usecase
 }
 
 var (
-	errInvalidRequest = errors.New("invalid request")
+	errInvalidRequestBody = errors.New("invalid request body")
 )
 
-func NewHandler(infra *infrastructure.Infrastructure, usecase *usecase.Usecase) *handler {
+func NewHandler(usecase *usecase.Usecase) *handler {
 	return &handler{
-		infra:   infra,
 		usecase: usecase,
 	}
 }
@@ -40,12 +37,6 @@ func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
 	router.POST("/scheduler/trigger", h.initTracerContext, h.HandleTriggerScheduler)
 	router.PATCH("/schedule", h.initTracerContext, h.HandleUpdateSchedule)
 	router.DELETE("/schedule", h.initTracerContext, h.HandleDeleteSchedule)
-
-	router.GET("/users", h.authenticate, h.onlyAdmin, h.initTracerContext, h.HandleGetUserInfoList)
-	router.GET("/users/info", h.authenticate, h.initTracerContext, h.HandleGetUserInfo)
-	router.PUT("/users", h.authenticate, h.onlyAdmin, h.initTracerContext, h.HandleUpdateUserInfo)
-	router.POST("/users", h.initTracerContext, h.HandleRegisterUser)
-	router.POST("/users/auth", h.initTracerContext, h.HandleLoginUser)
 
 	router.POST("/chart", h.initTracerContext, h.HandleGetSensorChart)
 	router.POST("/dummy_data", h.initTracerContext, h.HandleInsertDummyData)
