@@ -1,22 +1,13 @@
 package infrastructure
 
-import (
-	"ara-server/internal/infrastructure/configuration"
-	"ara-server/internal/infrastructure/tokenizer"
-)
+import "ara-server/internal/infrastructure/configuration"
 
 type Infrastructure struct {
-	*configuration.Config
-	*tokenizer.Tokenizer
+	configuration.Config
 }
 
-func NewInfrastructure(config *configuration.Config) *Infrastructure {
-	appConfig := config.GetConfig()
-
-	tokenizer := tokenizer.NewTokenizer(&appConfig)
-
+func NewInfrastructure(config configuration.Config) *Infrastructure {
 	return &Infrastructure{
 		config,
-		tokenizer,
 	}
 }

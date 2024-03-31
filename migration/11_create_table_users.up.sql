@@ -1,8 +1,0 @@
-CREATE TABLE IF NOT EXISTS users(
-    id SERIAL PRIMARY KEY,
-    email VARCHAR(100) UNIQUE,
-    password VARCHAR(60),
-    is_active BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-    updated_at TIMESTAMPTZ
-);

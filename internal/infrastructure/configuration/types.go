@@ -13,14 +13,9 @@ type Config struct {
 }
 
 type AppConfig struct {
-	Auth  AuthConfig  `yaml:"auth"`
-	Chart ChartConfig `yaml:"chart"`
 	DB    DBConfig    `yaml:"db"`
 	MQTT  MQTTConfig  `yaml:"mqtt"`
-}
-
-type AuthConfig struct {
-	JWTSecret string `yaml:"jwt_secret"`
+	Chart ChartConfig `yaml:"chart"`
 }
 
 type ChartConfig struct {

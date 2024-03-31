@@ -58,7 +58,7 @@ func main() {
 	router := initHTTPServer(config)
 
 	// initialize layers
-	infra := infrastructure.NewInfrastructure(&config)
+	infra := infrastructure.NewInfrastructure(config)
 	repoDB := db.NewRepository(dbInstance, infra)
 	repoMQ := mq.NewRepository(infra, mqttClient)
 	usecase := usecase.NewUsecase(infra, repoDB, repoMQ)
@@ -67,7 +67,7 @@ func main() {
 	mqHandler.InitHandler(usecase, mqttClient)
 
 	// initialize HTTP handler
-	handlerHTTP := httpHandler.NewHandler(infra, usecase)
+	handlerHTTP := httpHandler.NewHandler(usecase)
 	handlerHTTP.RegisterHTTPHandler(router)
 
 	// initialize cron handler
