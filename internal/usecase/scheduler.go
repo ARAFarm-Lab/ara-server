@@ -217,12 +217,12 @@ func (uc *Usecase) dispatchAction(ctx context.Context, action db.ActionSchedule)
 				}
 
 				// Set next run time if it is clean up time
+				nextRunTime := cronSchedule.Next(timeNow)
 				if !isCleanUpTime {
-					nextRunTime := cronSchedule.Next(timeNow)
 					action.NextRunAt = assignSQLNullTime(&nextRunTime)
 					action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, timeNow))
 				} else {
-					action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, action.NextRunAt.Time))
+					action.CleanupTime = assignSQLNullTime(calculateCleanupTime(action, nextRunTime))
 				}
 			} else {
 				if isCleanUpTime {
