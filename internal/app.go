@@ -38,7 +38,7 @@ func main() {
 	// initialize config
 	config, err := configuration.InitializeConfig()
 	if err != nil {
-		sysLog.Fatal(ctx, nil, err, "init config got error")
+		sysLog.Fatal("init config got error: ", err)
 	}
 
 	// init logger
