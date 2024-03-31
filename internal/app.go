@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	sysLog "log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -37,7 +38,7 @@ func main() {
 	// initialize config
 	config, err := configuration.InitializeConfig()
 	if err != nil {
-		log.Fatal(ctx, nil, err, "init config got error")
+		sysLog.Fatal(ctx, nil, err, "init config got error")
 	}
 
 	// init logger
