@@ -44,6 +44,8 @@ func (uc *Usecase) UpdateActuator(ctx context.Context, actuator Actuator) error 
 	existing.Name = actuator.Name
 	existing.Icon = actuator.Icon
 	existing.IsActive = actuator.IsActive
+	existing.PinNumber = actuator.PinNumber
+	existing.TerminalNumber = actuator.TerminalNumber
 
 	if err := uc.db.UpdateActuator(ctx, existing); err != nil {
 		log.Error(ctx, actuator, err, "failed to update actuator")

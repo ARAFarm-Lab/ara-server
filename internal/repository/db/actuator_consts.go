@@ -35,6 +35,7 @@ const (
 		SET
 			device_id = :device_id,
 			pin_number = :pin_number,
+			terminal_number = :terminal_number,
 			action_type = :action_type,
 			name = :name,
 			icon = :icon,
