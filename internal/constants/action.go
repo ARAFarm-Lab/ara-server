@@ -7,12 +7,9 @@ const (
 	ActionTypeRelay      ActionType = 1
 )
 
-type ActionSource uint8
-
 const (
-	ActionSourceUser       ActionSource = iota + 1 // manual trigger
-	ActionSourceScheduler                          // trigger by scheduler
-	ActionSourceDispatcher                         // trigger by condition defined in dispatcher
+	ActionSourceScheduler  = -1
+	ActionSourceDispatcher = -2
 )
 
 type ActionScheduleStatus uint8

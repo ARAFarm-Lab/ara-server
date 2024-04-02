@@ -9,3 +9,11 @@ var (
 	// actuator error
 	ErrorActuatorNotFound = errors.New("actuator not found")
 )
+
+// custom error codes for client
+type ErrorCode int
+
+const (
+	ErrorCodeUserNotFound ErrorCode = 103
+	ErrorCodeUserExists   ErrorCode = 104
+)

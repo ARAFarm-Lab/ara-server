@@ -1,7 +1,9 @@
 package http
 
 import (
+	"ara-server/internal/constants"
 	"ara-server/internal/usecase"
+	"context"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -44,6 +46,11 @@ func (h *handler) HandleUpdateActuator(ctx *gin.Context) {
 	if err := ctx.ShouldBindJSON(&actuator); err != nil {
 		WriteJson(ctx, nil, err)
 		return
+	}
+
+	ctxHandler := context.Background()
+	for key, value := range ctx.Copy().Keys {
+		ctxHandler = context.WithValue(ctxHandler, constants.ContextKey(key), value)
 	}
 
 	if err := h.usecase.UpdateActuator(ctx, actuator); err != nil {

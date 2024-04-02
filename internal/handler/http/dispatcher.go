@@ -16,11 +16,13 @@ func (h *handler) HandleDispatchAction(c *gin.Context) {
 		return
 	}
 
+	userID := c.GetInt(string(constants.CtxKeyUserID))
+
 	param := usecase.DispatcherParam{
 		DeviceID:   request.DeviceID,
 		ActuatorID: request.ActuatorID,
 		Value:      request.Value,
-		ActionBy:   constants.ActionSourceUser,
+		ActionBy:   userID,
 	}
 	if err := h.usecase.DispatchAction(c, param); err != nil {
 		WriteJson(c, nil, err)

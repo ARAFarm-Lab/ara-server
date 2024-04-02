@@ -22,7 +22,7 @@ func (uc *Usecase) GetUserInfo(ctx context.Context, userID int) (UserInfo, error
 	}
 
 	if user.Name == "" {
-		return UserInfo{}, errors.Wrap(errInvalidUser).WithType(errors.USER)
+		return UserInfo{}, errors.Wrap(errInvalidUser).WithCode(constants.ErrorCodeUserNotFound).WithType(errors.USER)
 	}
 
 	return UserInfo(user), nil
@@ -51,7 +51,7 @@ func (uc *Usecase) LoginUser(ctx context.Context, param LoginUserParam) (AuthRes
 	}
 
 	if user.ID == 0 {
-		return AuthResponse{}, errors.Wrap(errInvalidUser).WithType(errors.USER)
+		return AuthResponse{}, errors.Wrap(errInvalidUser).WithCode(constants.ErrorCodeUserNotFound).WithType(errors.USER)
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(param.Password)); err != nil {
@@ -79,7 +79,7 @@ func (uc *Usecase) RegisterUser(ctx context.Context, param RegisterUserParam) (A
 	}
 
 	if existingUser.ID != 0 {
-		return AuthResponse{}, errors.New("email already registered").WithType(errors.USER)
+		return AuthResponse{}, errors.New("email already registered").WithCode(constants.ErrorCodeUserExists).WithType(errors.USER)
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(param.Password), 10)
@@ -148,7 +148,7 @@ func (uc *Usecase) UpdateUserInfo(ctx context.Context, userInfo UserInfo) error 
 	}
 
 	if user.ID == 0 {
-		return errors.Wrap(err).WithType(errors.USER)
+		return errors.Wrap(errInvalidUser).WithCode(constants.ErrorCodeUserNotFound).WithType(errors.USER)
 	}
 
 	tx, err := uc.db.BeginTx(ctx)

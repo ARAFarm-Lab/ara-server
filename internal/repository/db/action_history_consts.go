@@ -9,9 +9,11 @@ const (
 			actuator.icon,
 			history.value,
 			history.action_by,
+			COALESCE(profile.name, '') as executor_name,
 			history.action_at
 		FROM action_histories history
 		INNER JOIN device_actuators actuator ON history.actuator_id = actuator.id
+		LEFT JOIN user_profiles profile ON profile.user_id = history.action_by
 		WHERE actuator.device_id = $1
 		ORDER BY action_at DESC
 		LIMIT 10
