@@ -46,9 +46,10 @@ func (uc *Usecase) GetActionHistories(ctx context.Context, deviceID int64) ([]Ac
 	for _, history := range histories {
 		actionTime := history.ActionAt
 		result = append(result, ActionHistory{
-			Value:    parseActionValue(history.ActionType, history.Value),
-			ActionBy: history.ActionBy,
-			ActionAt: &actionTime,
+			Value:          parseActionValue(history.ActionType, history.Value),
+			ActionBy:       history.ActionBy,
+			ActionExecutor: history.ActionExecutor,
+			ActionAt:       &actionTime,
 			Action: DispatcherAction{
 				ID:   history.ActuatorID,
 				Type: history.ActionType,

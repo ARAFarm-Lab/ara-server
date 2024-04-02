@@ -1,6 +1,7 @@
 package http
 
 import (
+	"ara-server/internal/constants"
 	"ara-server/internal/infrastructure/errors"
 	"ara-server/internal/usecase"
 	"net/http"
@@ -9,9 +10,9 @@ import (
 )
 
 func (h *handler) HandleGetUserInfo(ctx *gin.Context) {
-	userID := ctx.GetFloat64("user_id")
+	userID := ctx.GetInt(string(constants.CtxKeyUserID))
 
-	response, err := h.usecase.GetUserInfo(ctx, int(userID))
+	response, err := h.usecase.GetUserInfo(ctx, userID)
 	if err != nil {
 		if errors.IsUserError(err) {
 			WriteJson(ctx, nil, err, http.StatusBadRequest)

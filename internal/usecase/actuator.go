@@ -1,6 +1,7 @@
 package usecase
 
 import (
+	"ara-server/internal/constants"
 	"ara-server/internal/repository/db"
 	"ara-server/util/log"
 	"context"
@@ -44,8 +45,11 @@ func (uc *Usecase) UpdateActuator(ctx context.Context, actuator Actuator) error 
 	existing.Name = actuator.Name
 	existing.Icon = actuator.Icon
 	existing.IsActive = actuator.IsActive
-	existing.PinNumber = actuator.PinNumber
-	existing.TerminalNumber = actuator.TerminalNumber
+
+	if role := ctx.Value(string(constants.CtxKeyUserRole)).(constants.UserRole); role == constants.RoleAdmin {
+		existing.PinNumber = actuator.PinNumber
+		existing.TerminalNumber = actuator.TerminalNumber
+	}
 
 	if err := uc.db.UpdateActuator(ctx, existing); err != nil {
 		log.Error(ctx, actuator, err, "failed to update actuator")

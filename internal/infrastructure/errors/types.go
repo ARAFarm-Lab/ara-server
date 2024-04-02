@@ -1,6 +1,9 @@
 package errors
 
-import "errors"
+import (
+	"ara-server/internal/constants"
+	"errors"
+)
 
 type errorType uint8
 
@@ -12,6 +15,7 @@ const (
 type customError struct {
 	err       error
 	errorType errorType
+	code      constants.ErrorCode
 }
 
 func (e customError) Error() string {
@@ -25,16 +29,30 @@ func New(message string) customError {
 	}
 }
 
-func Wrap(err error) customError {
-	return customError{
-		err:       err,
-		errorType: SYSTEM,
+func GetCode(err error) (constants.ErrorCode, bool) {
+	customError, ok := err.(customError)
+	if !ok {
+		return 0, false
 	}
+
+	return customError.code, customError.code != 0
 }
 
 func (e customError) WithType(errorType errorType) customError {
 	e.errorType = errorType
 	return e
+}
+
+func (e customError) WithCode(code constants.ErrorCode) customError {
+	e.code = code
+	return e
+}
+
+func Wrap(err error) customError {
+	return customError{
+		err:       err,
+		errorType: SYSTEM,
+	}
 }
 
 func IsUserError(err error) bool {
