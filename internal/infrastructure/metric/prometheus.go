@@ -25,11 +25,16 @@ func (m *Metric) PushCounter(key MetricKey, values map[string]string) {
 	)
 	if counter, found = m.counterMap[key]; !found {
 		m.mutex.Lock()
+		labels := make([]string, 0, len(values))
+		for k := range values {
+			labels = append(labels, k)
+		}
+
 		counter = prometheus.NewCounterVec(
 			prometheus.CounterOpts{
-				Name: string(key),
+				Name: "ara_iot_" + string(key),
 			},
-			nil,
+			labels,
 		)
 		m.counterMap[key] = counter
 		m.mutex.Unlock()
