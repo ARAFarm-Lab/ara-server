@@ -7,13 +7,13 @@ import (
 )
 
 type Metric struct {
-	mutext     *sync.Mutex
+	mutex      *sync.Mutex
 	counterMap map[MetricKey]*prometheus.CounterVec
 }
 
 func NewMetric() *Metric {
 	return &Metric{
-		mutext:     new(sync.Mutex),
+		mutex:      new(sync.Mutex),
 		counterMap: make(map[MetricKey]*prometheus.CounterVec),
 	}
 }
@@ -24,6 +24,7 @@ func (m *Metric) PushCounter(key MetricKey, values map[string]string) {
 		found   bool
 	)
 	if counter, found = m.counterMap[key]; !found {
+		m.mutex.Lock()
 		counter = prometheus.NewCounterVec(
 			prometheus.CounterOpts{
 				Name: string(key),
@@ -31,6 +32,8 @@ func (m *Metric) PushCounter(key MetricKey, values map[string]string) {
 			nil,
 		)
 		m.counterMap[key] = counter
+		m.mutex.Unlock()
+		prometheus.MustRegister(counter)
 	}
 
 	counter.With(values).Inc()
