@@ -61,10 +61,7 @@ func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
 
 func (h *handler) handlerWrapper(handler func(ctx *gin.Context) error) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		// Initialize tracer context
 		ctx.Set(string(constants.CtxKeyCtxID), xid.New().String())
-		ctx.Next()
-
 		err := handler(ctx)
 
 		isSuccess := "true"
