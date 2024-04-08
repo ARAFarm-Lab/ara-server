@@ -27,7 +27,7 @@ func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {
 
 	states := make([][]interface{}, 0, len(histories))
 	for _, history := range histories {
-		states = append(states, []interface{}{history.ActionType, history.Value})
+		states = append(states, []interface{}{history.ActuatorID, history.Value})
 	}
 
 	pins := make([][]interface{}, 0, len(actuators))
