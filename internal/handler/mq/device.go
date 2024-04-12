@@ -19,5 +19,5 @@ func (h *handler) HandleInitiateDeviceState(ctx context.Context, msg mqtt.Messag
 }
 
 func (h *handler) HandleHeartbeatResponse(ctx context.Context, msg mqtt.Message) {
-
+	log.Info(ctx, nil, nil, "handling heartbeat response")
 }

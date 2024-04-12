@@ -12,7 +12,7 @@ const (
 	mqTopicAction                     = "action/"
 	mqTopicInitialDeviceStateResponse = "device-initial-state-response/"
 	mqTopicRestartDevice              = "restart-device/"
-	mqTopicHeartbeatResponse          = "hearbeat-request/"
+	mqTopicHeartbeatResponse          = "heartbeat-request/"
 )
 
 func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {

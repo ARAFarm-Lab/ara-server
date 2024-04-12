@@ -15,5 +15,7 @@ func (h *handler) HandleRestartDevice(ctx *gin.Context) error {
 	}
 
 	h.usecase.RestartDevice(ctx, deviceID)
+	WriteJson(ctx, nil, nil)
+
 	return nil
 }
