@@ -51,6 +51,19 @@ func (uc *Usecase) UpdateActuator(ctx context.Context, actuator Actuator) error 
 		existing.TerminalNumber = actuator.TerminalNumber
 	}
 
+	// If it is disabling the actuator, turn off the actuator
+	if !actuator.IsActive {
+		if err := uc.DispatchAction(ctx, DispatcherParam{
+			DeviceID:   existing.DeviceID,
+			ActuatorID: existing.ID,
+			Value:      false,
+			ActionBy:   constants.ActionSourceScheduler,
+		}); err != nil {
+			log.Error(ctx, existing, err, "failed to dispatch action")
+			return err
+		}
+	}
+
 	if err := uc.db.UpdateActuator(ctx, existing); err != nil {
 		log.Error(ctx, actuator, err, "failed to update actuator")
 		return err

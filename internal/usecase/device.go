@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"ara-server/internal/constants"
-	"ara-server/internal/repository/db"
 	"ara-server/util/log"
 	"context"
 	"strconv"
@@ -22,12 +21,7 @@ func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {
 		return
 	}
 
-	actuators, err := uc.db.GetActuatorsByFilter(ctx, []db.GetActuatorsFilter{
-		{
-			Name:  "is_active",
-			Value: true,
-		},
-	})
+	actuators, err := uc.db.GetActuatorsByFilter(ctx, nil)
 	if err != nil {
 		log.Error(ctx, deviceID, err, "failed getting actuator list")
 		return
