@@ -43,4 +43,6 @@ type DBConfig struct {
 type MQTTConfig struct {
 	Broker   string `yaml:"broker"`
 	ClientID string `yaml:"client_id"`
+	Username string `yaml:"username"`
+	Password string `yaml:"password"`
 }

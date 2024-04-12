@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	"strconv"
 	"time"
 
 	"github.com/robfig/cron/v3"
@@ -80,10 +79,6 @@ func assignSQLNullString(value string) sql.NullString {
 		String: value,
 		Valid:  true,
 	}
-}
-
-func generateDeviceTopic(deviceID int64) string {
-	return "d-" + strconv.FormatInt(deviceID, 10)
 }
 
 func getSQLNullString(str sql.NullString) string {
