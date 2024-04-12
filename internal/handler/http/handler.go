@@ -37,6 +37,8 @@ func (h *handler) RegisterHTTPHandler(router *gin.Engine) {
 	router.GET("/action/history", h.authenticate, h.handlerWrapper(h.HandleGetActionHistory))
 	router.POST("/action/dispatch", h.authenticate, h.handlerWrapper(h.HandleDispatchAction))
 
+	router.POST("/device/restart", h.authenticate, h.onlyAdmin, h.handlerWrapper(h.HandleRestartDevice))
+
 	router.GET("/actuators", h.authenticate, h.handlerWrapper(h.HandleGetActuators))
 	router.POST("/actuator", h.authenticate, h.handlerWrapper(h.HandleInsertActuator))
 	router.PATCH("/actuator", h.authenticate, h.handlerWrapper(h.HandleUpdateActuator))
@@ -89,13 +91,14 @@ func WriteJson(ctx *gin.Context, data interface{}, err error, httpStatusCode ...
 		code = http.StatusInternalServerError
 		payload["is_success"] = false
 		payload["error"] = err.Error()
+
+		if len(httpStatusCode) > 0 {
+			code = httpStatusCode[0]
+		}
+
+		payload["error_code"] = code
 	}
 
-	if len(httpStatusCode) > 0 {
-		code = httpStatusCode[0]
-	}
-
-	payload["error_code"] = code
 	if code, found := errors.GetCode(err); found {
 		payload["error_code"] = code
 	}

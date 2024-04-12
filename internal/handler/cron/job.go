@@ -20,3 +20,9 @@ func (h *handler) HandleInsertDummyData(ctx context.Context) {
 	}
 	log.Info(ctx, nil, nil, "finish handling insert dummy data")
 }
+
+func (h *handler) HandleSendHeartbeatRequest(ctx context.Context) {
+	log.Info(ctx, nil, nil, "start handling send heartbeat request")
+	h.usecase.SendHeartbeat(ctx, 1)
+	log.Info(ctx, nil, nil, "finish handling send heartbeat request")
+}
