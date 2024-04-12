@@ -65,7 +65,7 @@ func main() {
 	usecase := usecase.NewUsecase(infra, repoDB, repoMQ)
 
 	// initialize MQ handler
-	mqHandler.InitHandler(usecase, mqttClient)
+	mqHandler.InitHandler(infra, usecase, mqttClient)
 
 	// initialize HTTP handler
 	handlerHTTP := httpHandler.NewHandler(infra, usecase)
@@ -165,6 +165,8 @@ func initMQTT(ctx context.Context, config configuration.MQTTConfig) (mqtt.Client
 	opts := mqtt.NewClientOptions()
 	opts.AddBroker(config.Broker)
 	opts.SetClientID(config.ClientID)
+	opts.SetUsername(config.Username)
+	opts.SetPassword(config.Password)
 
 	opts.SetOrderMatters(false)       // Allow out of order messages (use this option unless in order delivery is essential)
 	opts.ConnectTimeout = time.Second // Minimal delays on connect

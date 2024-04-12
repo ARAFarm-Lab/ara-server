@@ -1,10 +1,18 @@
 package usecase
 
 import (
+	"ara-server/internal/constants"
 	"ara-server/internal/repository/db"
 	"ara-server/util/log"
 	"context"
 	"strconv"
+)
+
+const (
+	mqTopicAction                     = "action/"
+	mqTopicInitialDeviceStateResponse = "device-initial-state-response/"
+	mqTopicRestartDevice              = "restart-device/"
+	mqTopicHeartbeatResponse          = "hearbeat-request/"
 )
 
 func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {
@@ -40,7 +48,25 @@ func (uc *Usecase) InitiateDeviceState(ctx context.Context, deviceID int64) {
 		Values:    states,
 	}
 
-	uc.mq.PublishJSON("dcs-"+strconv.FormatInt(deviceID, 10), result)
+	uc.mq.PublishJSON(mqTopicInitialDeviceStateResponse+strconv.FormatInt(deviceID, 10), result)
+}
+
+func (uc *Usecase) RestartDevice(ctx context.Context, deviceID int64) {
+	uc.mq.PublishJSON(mqTopicRestartDevice+strconv.FormatInt(deviceID, 10), nil)
+}
+
+func (uc *Usecase) SendHeartbeat(ctx context.Context, deviceID int64) {
+	uc.mq.PublishJSON(mqTopicHeartbeatResponse+strconv.FormatInt(deviceID, 10), nil)
+}
+
+func (uc *Usecase) toggleBuiltInLED(ctx context.Context, param DispatcherParam) error {
+	value, ok := param.Value.(bool)
+	if !ok {
+		log.Error(ctx, param.Value, errorInvalidActionValue, "invalid built in LED action value")
+		return errorInvalidActionValue
+	}
+
+	return uc.mq.PublishJSON(mqTopicAction+strconv.FormatInt(param.DeviceID, 10), []interface{}{constants.ActionTypeBuiltInLED, value})
 }
 
 func (uc *Usecase) toggleRelay(ctx context.Context, param DispatcherParam) error {
@@ -50,5 +76,5 @@ func (uc *Usecase) toggleRelay(ctx context.Context, param DispatcherParam) error
 		return errorInvalidActionValue
 	}
 
-	return uc.mq.PublishJSON(generateDeviceTopic(param.DeviceID), []interface{}{param.ActuatorID, value})
+	return uc.mq.PublishJSON(mqTopicAction+strconv.FormatInt(param.DeviceID, 10), []interface{}{param.ActuatorID, value})
 }

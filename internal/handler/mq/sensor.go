@@ -11,7 +11,7 @@ import (
 	mqtt "github.com/eclipse/paho.mqtt.golang"
 )
 
-func (h *handler) HandleSensorRead(ctx context.Context, client mqtt.Client, msg mqtt.Message) {
+func (h *handler) HandleSensorRead(ctx context.Context, msg mqtt.Message) {
 	deviceID := getDeviceID(msg.Topic())
 	if deviceID < 0 {
 		return
