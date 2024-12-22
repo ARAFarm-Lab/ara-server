@@ -8,17 +8,11 @@ import (
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/rs/xid"
 )
 
 var forbiddenPayload = map[string]interface{}{
 	"message":    "Access Denied",
 	"error_code": http.StatusForbidden,
-}
-
-func (h *handler) initTracerContext(ctx *gin.Context) {
-	ctx.Set(string(constants.CtxKeyCtxID), xid.New().String())
-	ctx.Next()
 }
 
 func (h *handler) authenticate(ctx *gin.Context) {

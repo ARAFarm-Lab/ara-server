@@ -61,6 +61,7 @@ func (h *handler) HandleUpdateActuator(ctx *gin.Context) error {
 		return err
 	}
 
+	h.usecase.InitiateDeviceState(ctx, 1)
 	WriteJson(ctx, nil, nil)
 	return nil
 }
